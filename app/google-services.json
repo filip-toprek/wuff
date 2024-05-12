@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "240349141931",
+    "project_id": "wuff-toprek",
+    "storage_bucket": "wuff-toprek.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240349141931:android:c6b23fd42be4c85adf10ee",
+        "android_client_info": {
+          "package_name": "com.filiptoprek.wuff"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmhgrDiykXCwOIYzBtwqNCv8o1-_Z_ZVw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
