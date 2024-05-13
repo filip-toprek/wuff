@@ -1,15 +1,22 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
-package com.filiptoprek.wuff.ui.auth
+package com.filiptoprek.wuff.auth.presentation
 
+import android.content.Intent
 import android.graphics.Color.parseColor
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -25,45 +33,87 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.filiptoprek.wuff.Routes
+import com.filiptoprek.wuff.R
+import com.filiptoprek.wuff.auth.data.utils.await
+import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.auth.domain.model.Resource
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
-import kotlin.math.log
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
 fun PreviewLogin(){
-    LoginScreen(navController = rememberNavController(), viewModel = null)
+    LoginScreen(navController = rememberNavController(), viewModel = null, googleSignInClient = null)
 }
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    viewModel: AuthViewModel?
+    viewModel: AuthViewModel?,
+    googleSignInClient: GoogleSignInClient?
 ) {
     var emailText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var errorText by remember { mutableStateOf("") }
 
     val loginFlow = viewModel?.loginFlow?.collectAsState()
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+
+    @Composable
+    fun rememberFirebaseAuthLauncher(
+        onAuthComplete: (AuthResult) -> Unit,
+        onAuthError: (ApiException) -> Unit
+    ): ManagedActivityResultLauncher<Intent, ActivityResult> {
+        val scope = rememberCoroutineScope()
+        return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            viewModel?.signInWithGoogle(task, scope)
+        }
+    }
+
+
+    val launcher = rememberFirebaseAuthLauncher(
+        onAuthComplete = { result ->
+            user = result.user
+        },
+        onAuthError = {
+            user = null
+        }
+    )
+
 
     Column(
         modifier = Modifier
@@ -84,6 +134,19 @@ fun LoginScreen(
                 color = Color.White
             )
         )
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)
+                .padding(top = 80.dp),
+            text = if(errorText.contains("|")) errorText.split("|")[1] else "",
+            style = TextStyle(
+                fontFamily = Opensans,
+                fontSize = 15.sp,
+                lineHeight = 5.sp,
+                color = Color.Red
+            )
+        )
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -99,7 +162,16 @@ fun LoginScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor =  Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent)
+                unfocusedIndicatorColor = Color.Transparent),
+            supportingText = {
+                if (errorText == "BAD_EMAIL") {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Molimo unesite vašu email adresu",
+                        color = Color.Red
+                    )
+                }
+            }
         )
 
         TextField(
@@ -118,15 +190,23 @@ fun LoginScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor =  Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent)
+                unfocusedIndicatorColor = Color.Transparent),
+            supportingText = {
+                if (errorText == "BAD_PASSWORD") {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Molimo unesite lozinku",
+                        color = Color.Red
+                    )
+                }
+            }
         )
 
         loginFlow?.value?.let {
             when(it){
-                is Resource.Faliure -> {
+                is Resource.Failure -> {
                     isLoading = false
-                    val context = LocalContext.current
-                    Toast.makeText(context, it.exception.message, Toast.LENGTH_LONG).show()
+                    errorText = it.exception.message.toString()
                 }
                 Resource.Loading -> {
                     isLoading = true
@@ -147,7 +227,6 @@ fun LoginScreen(
             }
         }
 
-
         Button(modifier = Modifier
             .fillMaxWidth()
             .wrapContentWidth(Alignment.CenterHorizontally)
@@ -155,6 +234,7 @@ fun LoginScreen(
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(parseColor("#52B788"))),
             onClick = {
+                errorText = ""
                 viewModel?.login(emailText, passwordText)
             },
             enabled = !isLoading)
@@ -171,6 +251,13 @@ fun LoginScreen(
                 )
             )
         }
+
+
+        GoogleSignInButton(text = "Prijavi") {
+            launcher.launch(googleSignInClient?.signInIntent)
+        }
+
+
         Row(modifier = Modifier
             .fillMaxWidth()
             .wrapContentWidth(Alignment.CenterHorizontally)
@@ -201,5 +288,25 @@ fun LoginScreen(
                 }
             )
         }
+    }
+}
+
+@Composable
+fun GoogleSignInButton(text: String = "Prijavi", onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth(Alignment.CenterHorizontally)
+            .padding(10.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(parseColor("#52B788")))
+    ) {
+        Icon(
+            ImageVector.vectorResource(id = R.drawable.ic_google_logo),
+            contentDescription = "$text se sa Google računom"
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("$text se sa Google računom", color = Color.White)
     }
 }

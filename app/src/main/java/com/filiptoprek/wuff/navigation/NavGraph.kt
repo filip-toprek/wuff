@@ -1,20 +1,22 @@
-package com.filiptoprek.wuff
+package com.filiptoprek.wuff.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.filiptoprek.wuff.ui.auth.AuthViewModel
-import com.filiptoprek.wuff.ui.auth.LoginScreen
-import com.filiptoprek.wuff.ui.auth.LandingScreen
-import com.filiptoprek.wuff.ui.auth.RegisterScreen
+import com.filiptoprek.wuff.auth.presentation.AuthViewModel
+import com.filiptoprek.wuff.auth.presentation.LoginScreen
+import com.filiptoprek.wuff.ui.landing.LandingScreen
+import com.filiptoprek.wuff.auth.presentation.RegisterScreen
 import com.filiptoprek.wuff.ui.home.HomeScreen
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 
 @Composable
 fun SetupNavGraph(
     navController: NavHostController = rememberNavController(),
-    viewModel: AuthViewModel
+    viewModel: AuthViewModel,
+    googleSignInClient: GoogleSignInClient
 ){
     NavHost(navController = navController, startDestination =
         if(viewModel.currentUser == null){
@@ -33,12 +35,12 @@ fun SetupNavGraph(
         composable(
             route = Routes.Login.route
         ){
-            LoginScreen(navController, viewModel)
+            LoginScreen(navController, viewModel, googleSignInClient)
         }
         composable(
             route = Routes.Register.route
         ){
-            RegisterScreen(navController, viewModel)
+            RegisterScreen(navController, viewModel, googleSignInClient)
         }
         composable(
             route = Routes.Home.route

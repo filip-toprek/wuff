@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.ui.auth
+package com.filiptoprek.wuff.ui.landing
 
 import android.app.Activity
 import androidx.compose.foundation.Image
@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
@@ -29,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
-import com.filiptoprek.wuff.Routes
+import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 

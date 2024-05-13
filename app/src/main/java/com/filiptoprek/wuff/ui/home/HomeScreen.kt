@@ -12,8 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
-import com.filiptoprek.wuff.Routes
-import com.filiptoprek.wuff.ui.auth.AuthViewModel
+import com.filiptoprek.wuff.navigation.Routes
+import com.filiptoprek.wuff.auth.presentation.AuthViewModel
 
 @Composable
 fun HomeScreen(

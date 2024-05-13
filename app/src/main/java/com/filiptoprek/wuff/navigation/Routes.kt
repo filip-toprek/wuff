@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff
+package com.filiptoprek.wuff.navigation
 
 sealed class Routes(val route: String) {
     object LandingScreen : Routes("LandingScreen")
