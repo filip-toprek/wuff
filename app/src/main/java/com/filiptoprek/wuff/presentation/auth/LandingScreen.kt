@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.ui.landing
+package com.filiptoprek.wuff.presentation.auth
 
 import android.app.Activity
 import androidx.compose.foundation.Image

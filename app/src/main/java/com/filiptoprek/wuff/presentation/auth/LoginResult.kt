@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.auth.presentation
+package com.filiptoprek.wuff.presentation.auth
 
 data class LoginResult (
     val data: UserData?,

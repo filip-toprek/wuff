@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.auth.domain.model
+package com.filiptoprek.wuff.domain.model.auth
 
 sealed class Resource<out R> {
     data class Success<out R>(val result: R): Resource<R>();

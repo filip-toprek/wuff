@@ -1,28 +1,16 @@
-package com.filiptoprek.wuff.auth.data.repository
+package com.filiptoprek.wuff.data.repository
 
 import android.content.Context
-import android.content.Intent
-import android.content.IntentSender
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.filiptoprek.wuff.R
-import com.filiptoprek.wuff.auth.data.utils.await
-import com.filiptoprek.wuff.auth.domain.model.Resource
-import com.filiptoprek.wuff.auth.domain.repository.AuthRepository
-import com.filiptoprek.wuff.auth.presentation.LoginResult
-import com.filiptoprek.wuff.auth.presentation.UserData
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.filiptoprek.wuff.data.utils.await
+import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.domain.repository.AuthRepository
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
@@ -30,6 +18,18 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
     override val currentUser: FirebaseUser?
         get() = firebaseAuth.currentUser
+
+    private val _currentUserLiveData: MutableLiveData<FirebaseUser?> = MutableLiveData()
+    override val currentUserLiveData: LiveData<FirebaseUser?>
+        get() = _currentUserLiveData
+
+    init {
+        // Listen for changes in the authentication state
+        firebaseAuth.addAuthStateListener { firebaseAuth ->
+            // Update the value of currentUserLiveData when authentication state changes
+            _currentUserLiveData.value = firebaseAuth.currentUser
+        }
+    }
 
     override suspend fun login(email: String, password: String): Resource<FirebaseUser> {
         return try {
@@ -81,7 +81,6 @@ class AuthRepositoryImpl @Inject constructor(
 
         firebaseAuth.signInWithCredential(googleAuthCredential).addOnCompleteListener { authTask ->
             if (authTask.isSuccessful) {
-                var isNewUser = authTask.result?.additionalUserInfo?.isNewUser
                 val firebaseUser: FirebaseUser? = firebaseAuth.currentUser
                 if (firebaseUser != null) {
                     authenticatedUserMutableLiveData.value = Resource.Success(firebaseUser)

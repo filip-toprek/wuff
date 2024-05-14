@@ -1,27 +1,16 @@
-package com.filiptoprek.wuff.auth.presentation
+package com.filiptoprek.wuff.presentation.auth
 
-import android.app.Activity
-import android.app.Activity.RESULT_OK
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arrow.core.computations.result
-import com.filiptoprek.wuff.MainActivity
-import com.filiptoprek.wuff.auth.data.utils.await
-import com.filiptoprek.wuff.auth.domain.model.Resource
-import com.filiptoprek.wuff.auth.domain.repository.AuthRepository
-import com.filiptoprek.wuff.auth.domain.usecase.FormValidatorUseCase
-import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.filiptoprek.wuff.data.utils.await
+import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.domain.repository.AuthRepository
+import com.filiptoprek.wuff.domain.usecase.FormValidatorUseCase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
@@ -45,6 +34,9 @@ class AuthViewModel @Inject constructor(
 
     private val _registerFlow = MutableStateFlow<Resource<FirebaseUser>?>(null)
     val registerFlow: StateFlow<Resource<FirebaseUser>?> = _registerFlow
+
+    val currentUserLiveData: LiveData<FirebaseUser?>
+        get() = authRepository.currentUserLiveData
 
     val currentUser: FirebaseUser?
         get() = authRepository.currentUser
@@ -88,9 +80,9 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun logout(){
+    suspend fun logout(){
         authRepository.logout()
-        googleSignInClient.signOut()
+        googleSignInClient.signOut().await()
         _loginFlow.value = null
         _registerFlow.value = null
     }

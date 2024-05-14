@@ -64,7 +64,7 @@ fun WuffTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = Color(parseColor("#333333")).toArgb()
+            window.statusBarColor = Color(parseColor("#081C15")).toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }

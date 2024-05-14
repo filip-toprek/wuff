@@ -3,12 +3,12 @@ package com.filiptoprek.wuff.di
 import android.app.Application
 import android.content.Context
 import com.filiptoprek.wuff.R
-import com.filiptoprek.wuff.auth.data.repository.AuthRepositoryImpl
-import com.filiptoprek.wuff.auth.domain.repository.AuthRepository
-import com.filiptoprek.wuff.auth.domain.usecase.FormValidatorUseCase
-import com.filiptoprek.wuff.auth.domain.usecase.ValidateEmailUseCase
-import com.filiptoprek.wuff.auth.domain.usecase.ValidateNameUseCase
-import com.filiptoprek.wuff.auth.domain.usecase.ValidatePasswordUseCase
+import com.filiptoprek.wuff.data.repository.AuthRepositoryImpl
+import com.filiptoprek.wuff.domain.repository.AuthRepository
+import com.filiptoprek.wuff.domain.usecase.FormValidatorUseCase
+import com.filiptoprek.wuff.domain.usecase.ValidateEmailUseCase
+import com.filiptoprek.wuff.domain.usecase.ValidateNameUseCase
+import com.filiptoprek.wuff.domain.usecase.ValidatePasswordUseCase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -16,7 +16,6 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -24,9 +23,11 @@ import javax.inject.Singleton
 @Module
 object AppModule {
 
+    @Singleton
     @Provides
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
+    @Singleton
     @Provides
     fun provideAuthRepository(impl: AuthRepositoryImpl): AuthRepository = impl
 

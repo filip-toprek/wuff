@@ -2,6 +2,8 @@
 <resources>
     <color name="green_accent">#FF52B788</color>
     <color name="background_dark">#FF081C15</color>
+    <color name="gray">#FF333333</color>
+    <color name="background_white">#FFECECEC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>

@@ -1,12 +1,11 @@
 package com.filiptoprek.wuff
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import com.filiptoprek.wuff.navigation.SetupNavGraph
-import com.filiptoprek.wuff.auth.presentation.AuthViewModel
+import com.filiptoprek.wuff.presentation.auth.AuthViewModel
 import com.filiptoprek.wuff.ui.theme.WuffTheme
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.AndroidEntryPoint
