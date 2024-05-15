@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.filiptoprek.wuff.data.utils.await
 import com.filiptoprek.wuff.domain.model.auth.Resource
-import com.filiptoprek.wuff.domain.repository.AuthRepository
-import com.filiptoprek.wuff.domain.usecase.FormValidatorUseCase
+import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
+import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.common.api.ApiException
@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 
@@ -92,26 +93,15 @@ class AuthViewModel @Inject constructor(
             val account = task.getResult(ApiException::class.java)!!
             val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
             scope.launch {
-                _loginFlow.value = Resource.Loading
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                _loginFlow.value = Resource.Success(authResult.user!!)
-            }
-        } catch (e: ApiException) {
-            _loginFlow.value = Resource.Failure(e)
-        }
-    }
-
-    fun signUpWithGoogle(task: Task<GoogleSignInAccount>, scope: CoroutineScope) {
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
                 _registerFlow.value = Resource.Loading
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                _registerFlow.value = Resource.Success(authResult.user!!)
+                _loginFlow.value = Resource.Loading
+                val authResult = authRepository.firebaseSignInWithGoogle(credential)
+                _registerFlow.value = authResult
+                _loginFlow.value = authResult
             }
         } catch (e: ApiException) {
             _registerFlow.value = Resource.Failure(e)
+            _loginFlow.value = Resource.Failure(e)
         }
     }
 }

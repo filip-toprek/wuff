@@ -37,7 +37,8 @@ import com.filiptoprek.wuff.presentation.auth.LandingScreen
 import com.filiptoprek.wuff.presentation.auth.RegisterScreen
 import com.filiptoprek.wuff.domain.model.core.BottomNavigationItem
 import com.filiptoprek.wuff.presentation.core.HomeScreen
-import com.filiptoprek.wuff.presentation.core.ProfileScreen
+import com.filiptoprek.wuff.presentation.core.ProfileViewModel
+import com.filiptoprek.wuff.presentation.profile.ProfileScreen
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseUser
 
@@ -46,6 +47,7 @@ import com.google.firebase.auth.FirebaseUser
 fun SetupNavGraph(
     navController: NavHostController = rememberNavController(),
     viewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -129,6 +131,7 @@ fun SetupNavGraph(
             navController = navController,
             startDestination =
             if (viewModel.currentUser == null) {
+                selectedItemIndex = 0
                 Routes.LandingScreen.route
             } else {
                 Routes.Home.route
@@ -159,7 +162,7 @@ fun SetupNavGraph(
             composable(
                 route = Routes.Profile.route
             ) {
-                ProfileScreen(navController, viewModel)
+                ProfileScreen(navController, viewModel, profileViewModel)
             }
         }
     }

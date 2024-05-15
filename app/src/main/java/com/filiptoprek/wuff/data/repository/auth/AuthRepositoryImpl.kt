@@ -1,20 +1,22 @@
-package com.filiptoprek.wuff.data.repository
+package com.filiptoprek.wuff.data.repository.auth
 
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.filiptoprek.wuff.data.utils.await
 import com.filiptoprek.wuff.domain.model.auth.Resource
-import com.filiptoprek.wuff.domain.repository.AuthRepository
+import com.filiptoprek.wuff.domain.model.profile.UserProfile
+import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val context: Context,
+    private val firebaseFirestore: FirebaseFirestore,
 ) : AuthRepository {
     override val currentUser: FirebaseUser?
         get() = firebaseAuth.currentUser
@@ -24,9 +26,7 @@ class AuthRepositoryImpl @Inject constructor(
         get() = _currentUserLiveData
 
     init {
-        // Listen for changes in the authentication state
         firebaseAuth.addAuthStateListener { firebaseAuth ->
-            // Update the value of currentUserLiveData when authentication state changes
             _currentUserLiveData.value = firebaseAuth.currentUser
         }
     }
@@ -57,6 +57,7 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             result?.user?.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build())?.await()
+            createUserProfile(result?.user?.uid.toString(), UserProfile(balance = 0.0, aboutUser = "Jako volim ljude i šetnje uz plažu", numOfWalks = 0))
             Resource.Success(result.user!!)
         }catch (e: Exception)
         {
@@ -75,27 +76,23 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     // Sign in using google
-    override fun firebaseSignInWithGoogle(googleAuthCredential: AuthCredential): MutableLiveData<Resource<FirebaseUser>> {
-        val authenticatedUserMutableLiveData: MutableLiveData<Resource<FirebaseUser>> =
-            MutableLiveData()
+    override suspend fun firebaseSignInWithGoogle(googleAuthCredential: AuthCredential): Resource<FirebaseUser> {
 
-        firebaseAuth.signInWithCredential(googleAuthCredential).addOnCompleteListener { authTask ->
-            if (authTask.isSuccessful) {
-                val firebaseUser: FirebaseUser? = firebaseAuth.currentUser
-                if (firebaseUser != null) {
-                    authenticatedUserMutableLiveData.value = Resource.Success(firebaseUser)
-                }
-            } else {
-
-                authenticatedUserMutableLiveData.value = authTask.exception?.let {
-                    Resource.Failure(it)
-                }
-
+        return try {
+            val result = firebaseAuth.signInWithCredential(googleAuthCredential).await()
+            if(result?.additionalUserInfo?.isNewUser == true)
+            {
+               createUserProfile(result.user?.uid.toString(), UserProfile(balance = 0.0, aboutUser = "Jako volim ljude i šetnje uz plažu", numOfWalks = 0))
             }
-
-
+            Resource.Success(result?.user!!)
+        }catch (e: Exception)
+        {
+            Resource.Failure(e)
         }
-        return authenticatedUserMutableLiveData
+    }
+
+    override suspend fun createUserProfile(userId: String, userProfile: UserProfile) {
+        firebaseFirestore.collection("users").document(userId).set(userProfile).await()
     }
 
 }

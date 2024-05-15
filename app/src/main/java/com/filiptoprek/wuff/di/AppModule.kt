@@ -3,16 +3,20 @@ package com.filiptoprek.wuff.di
 import android.app.Application
 import android.content.Context
 import com.filiptoprek.wuff.R
-import com.filiptoprek.wuff.data.repository.AuthRepositoryImpl
-import com.filiptoprek.wuff.domain.repository.AuthRepository
-import com.filiptoprek.wuff.domain.usecase.FormValidatorUseCase
-import com.filiptoprek.wuff.domain.usecase.ValidateEmailUseCase
-import com.filiptoprek.wuff.domain.usecase.ValidateNameUseCase
-import com.filiptoprek.wuff.domain.usecase.ValidatePasswordUseCase
+import com.filiptoprek.wuff.data.repository.auth.AuthRepositoryImpl
+import com.filiptoprek.wuff.data.repository.profile.ProfileRepositoryImpl
+import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
+import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
+import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
+import com.filiptoprek.wuff.domain.usecase.auth.ValidateEmailUseCase
+import com.filiptoprek.wuff.domain.usecase.auth.ValidateNameUseCase
+import com.filiptoprek.wuff.domain.usecase.auth.ValidatePasswordUseCase
+import com.filiptoprek.wuff.domain.usecase.profile.ValidateAboutUserUseCase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,13 +27,21 @@ import javax.inject.Singleton
 @Module
 object AppModule {
 
-    @Singleton
     @Provides
+    @Singleton
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
-    @Singleton
     @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    @Provides
+    @Singleton
     fun provideAuthRepository(impl: AuthRepositoryImpl): AuthRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideProfileRepository(impl: ProfileRepositoryImpl): ProfileRepository = impl
 
     @Provides
     @Singleton
@@ -54,6 +66,12 @@ object AppModule {
             validEmail = ValidateEmailUseCase(),
             validPassword = ValidatePasswordUseCase(),
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideValidateAboutUserUseCase(): ValidateAboutUserUseCase {
+        return ValidateAboutUserUseCase()
     }
 
 }

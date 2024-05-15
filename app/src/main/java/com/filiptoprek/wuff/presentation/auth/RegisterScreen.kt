@@ -78,7 +78,7 @@ fun RegisterScreen(
         val scope = rememberCoroutineScope()
         return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            viewModel?.signUpWithGoogle(task, scope)
+            viewModel?.signInWithGoogle(task, scope)
         }
     }
 

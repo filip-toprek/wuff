@@ -173,7 +173,7 @@ fun walkerTab()
 
     ){
         AsyncImage(
-            modifier = Modifier.clip(RoundedCornerShape(30.dp)).height(40.dp),
+            modifier = Modifier.clip(RoundedCornerShape(90.dp)).height(40.dp),
             model = "viewModel?.currentUser?.photoUrl",
             placeholder = painterResource(id = R.drawable.user_placeholder),
             error = painterResource(id = R.drawable.user_placeholder),

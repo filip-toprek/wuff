@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.domain.usecase
+package com.filiptoprek.wuff.domain.usecase.auth
 
 class ValidatePasswordUseCase {
     operator fun invoke(password: String): Boolean{

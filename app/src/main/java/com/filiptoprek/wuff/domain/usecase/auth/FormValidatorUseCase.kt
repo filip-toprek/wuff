@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.domain.usecase
+package com.filiptoprek.wuff.domain.usecase.auth
 
 class FormValidatorUseCase(
     private val validName: ValidateNameUseCase,
