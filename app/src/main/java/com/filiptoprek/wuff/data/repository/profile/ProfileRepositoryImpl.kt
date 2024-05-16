@@ -18,6 +18,16 @@ class ProfileRepositoryImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
 ) : ProfileRepository {
 
+    override suspend fun becomeWalker(userProfile: UserProfile, userId: String): Resource<UserProfile>? {
+        return try{
+            firebaseFirestore.collection("users").document(userId).update("walker", userProfile.walker).await()
+            Resource.Success(userProfile)
+        }catch (e: Exception)
+        {
+            Resource.Failure(e)
+        }
+    }
+
     override suspend fun updateUserProfile(userProfile: UserProfile, userId: String): Resource<UserProfile> {
         return try {
             firebaseFirestore.collection("users").document(userId).update("aboutUser", userProfile.aboutUser).await()

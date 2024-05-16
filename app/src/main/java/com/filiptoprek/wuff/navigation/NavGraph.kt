@@ -1,5 +1,6 @@
 package com.filiptoprek.wuff.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -36,8 +37,9 @@ import com.filiptoprek.wuff.presentation.auth.LoginScreen
 import com.filiptoprek.wuff.presentation.auth.LandingScreen
 import com.filiptoprek.wuff.presentation.auth.RegisterScreen
 import com.filiptoprek.wuff.domain.model.core.BottomNavigationItem
-import com.filiptoprek.wuff.presentation.core.HomeScreen
-import com.filiptoprek.wuff.presentation.core.ProfileViewModel
+import com.filiptoprek.wuff.presentation.home.HomeScreen
+import com.filiptoprek.wuff.presentation.home.HomeViewModel
+import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileScreen
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseUser
@@ -48,6 +50,7 @@ fun SetupNavGraph(
     navController: NavHostController = rememberNavController(),
     viewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
+    homeViewModel: HomeViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -95,7 +98,9 @@ fun SetupNavGraph(
                             selected = index == selectedItemIndex,
                             onClick = {
                                 selectedItemIndex = index
-                                navController.navigate(item.route)
+                                navController.navigate(item.route){
+                                    popUpTo(item.route) { inclusive = true }
+                                }
                             },
                             label = {
                                 Text(text = item.title)
@@ -157,12 +162,16 @@ fun SetupNavGraph(
             composable(
                 route = Routes.Home.route
             ) {
-                HomeScreen(navController, viewModel)
+                BackHandler(true) {
+                }
+                HomeScreen(navController, homeViewModel)
             }
             composable(
                 route = Routes.Profile.route
             ) {
                 ProfileScreen(navController, viewModel, profileViewModel)
+                BackHandler(true) {
+                }
             }
         }
     }

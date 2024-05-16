@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.presentation.core;
+package com.filiptoprek.wuff.presentation.profile;
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,7 +6,6 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository;
 import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository;
-import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
 import com.filiptoprek.wuff.domain.usecase.profile.ValidateAboutUserUseCase
 
 import javax.inject.Inject;
@@ -15,7 +14,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -50,8 +48,26 @@ class ProfileViewModel @Inject constructor(
 
     val userProfile: UserProfile?
         get() {
-            return  profile
+            return profile
         }
+
+    fun becomeWalker(userProfile: UserProfile) {
+        viewModelScope.launch {
+            _profileFlow.value = Resource.Loading
+            val result = profileRepository.becomeWalker(
+                userProfile,
+                authRepository.currentUser?.uid.toString()
+            )
+            if(result == null)
+            {
+                _profileFlow.value = Resource.Failure(Exception("Error"))
+            }else
+            {
+                _profileFlow.value = result
+                loadUserProfile()
+            }
+        }
+    }
 
     fun updateUserProfile(userProfile: UserProfile): Boolean
     {
@@ -61,6 +77,7 @@ class ProfileViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            _profileFlow.value = Resource.Loading
             val result = profileRepository.updateUserProfile(
                 userProfile,
                 authRepository.currentUser?.uid.toString()

@@ -4,8 +4,10 @@ import android.app.Application
 import android.content.Context
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.data.repository.auth.AuthRepositoryImpl
+import com.filiptoprek.wuff.data.repository.home.HomeRepositoryImpl
 import com.filiptoprek.wuff.data.repository.profile.ProfileRepositoryImpl
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
+import com.filiptoprek.wuff.domain.repository.home.HomeRepository
 import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
 import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateEmailUseCase
@@ -42,6 +44,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideProfileRepository(impl: ProfileRepositoryImpl): ProfileRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideHomeRepository(impl: HomeRepositoryImpl): HomeRepository = impl
 
     @Provides
     @Singleton

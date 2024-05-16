@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.filiptoprek.wuff.data.utils.await
 import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.domain.model.profile.UserData
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.google.firebase.auth.AuthCredential
@@ -57,7 +58,16 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             result?.user?.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build())?.await()
-            createUserProfile(result?.user?.uid.toString(), UserProfile(balance = 0.0, aboutUser = "Jako volim ljude i šetnje uz plažu", numOfWalks = 0))
+            createUserProfile(
+                result.user?.uid.toString(),
+                UserProfile(
+                    balance = 0.0,
+                    aboutUser = "Jako volim ljude i šetnje uz plažu",
+                    numOfWalks = 0,
+                    user = UserData(
+                        result.user?.displayName.toString(),
+                        result.user?.photoUrl.toString())
+                ))
             Resource.Success(result.user!!)
         }catch (e: Exception)
         {
@@ -82,7 +92,16 @@ class AuthRepositoryImpl @Inject constructor(
             val result = firebaseAuth.signInWithCredential(googleAuthCredential).await()
             if(result?.additionalUserInfo?.isNewUser == true)
             {
-               createUserProfile(result.user?.uid.toString(), UserProfile(balance = 0.0, aboutUser = "Jako volim ljude i šetnje uz plažu", numOfWalks = 0))
+               createUserProfile(
+                   result.user?.uid.toString(),
+                   UserProfile(
+                       balance = 0.0,
+                       aboutUser = "Jako volim ljude i šetnje uz plažu",
+                       numOfWalks = 0,
+                       user = UserData(
+                           result.user?.displayName.toString(),
+                           result.user?.photoUrl.toString())
+                   ))
             }
             Resource.Success(result?.user!!)
         }catch (e: Exception)
