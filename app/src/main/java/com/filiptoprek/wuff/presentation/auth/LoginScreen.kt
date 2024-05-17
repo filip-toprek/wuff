@@ -146,7 +146,7 @@ fun LoginScreen(
             label = { Text("Email", color = Color(parseColor("#333333"))) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
-                textColor = Color(parseColor("#333333")),
+                unfocusedTextColor = Color(parseColor("#333333")),
                 containerColor  = Color.White,
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
@@ -174,7 +174,7 @@ fun LoginScreen(
             label = { Text("Lozinka", color = Color(parseColor("#333333"))) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
-                textColor = Color(parseColor("#333333")),
+                unfocusedTextColor = Color(parseColor("#333333")),
                 containerColor  = Color.White,
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
@@ -243,7 +243,7 @@ fun LoginScreen(
 
 
         GoogleSignInButton(text = "Prijavi") {
-            launcher.launch(googleSignInClient?.signInIntent)
+            launcher.launch(googleSignInClient?.signInIntent!!)
         }
 
 

@@ -6,9 +6,11 @@ import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.data.repository.auth.AuthRepositoryImpl
 import com.filiptoprek.wuff.data.repository.home.HomeRepositoryImpl
 import com.filiptoprek.wuff.data.repository.profile.ProfileRepositoryImpl
+import com.filiptoprek.wuff.data.repository.reservation.ReservationRepositoryImpl
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.filiptoprek.wuff.domain.repository.home.HomeRepository
 import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
+import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateEmailUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateNameUseCase
@@ -40,6 +42,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAuthRepository(impl: AuthRepositoryImpl): AuthRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideReservationRepository(impl: ReservationRepositoryImpl): ReservationRepository = impl
 
     @Provides
     @Singleton

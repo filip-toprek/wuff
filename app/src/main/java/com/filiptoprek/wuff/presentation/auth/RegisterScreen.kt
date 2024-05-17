@@ -120,7 +120,7 @@ fun RegisterScreen(
             label = { Text("Ime i prezime", color = Color(parseColor("#333333"))) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
-                textColor = Color(parseColor("#333333")),
+                unfocusedTextColor = Color(parseColor("#333333")),
                 containerColor = Color.White,
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
@@ -148,7 +148,7 @@ fun RegisterScreen(
             label = { Text("Email", color = Color(parseColor("#333333"))) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
-                textColor = Color(parseColor("#333333")),
+                unfocusedTextColor = Color(parseColor("#333333")),
                 containerColor = Color.White,
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
@@ -177,7 +177,7 @@ fun RegisterScreen(
             label = { Text("Lozinka", color = Color(parseColor("#333333"))) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
-                textColor = Color(parseColor("#333333")),
+                unfocusedTextColor = Color(parseColor("#333333")),
                 containerColor = Color.White,
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
@@ -206,7 +206,7 @@ fun RegisterScreen(
             label = { Text("Potvrdi lozinku", color = Color(parseColor("#333333"))) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
-                textColor = Color(parseColor("#333333")),
+                unfocusedTextColor = Color(parseColor("#333333")),
                 containerColor = Color.White,
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
@@ -275,7 +275,7 @@ fun RegisterScreen(
         }
 
         GoogleSignInButton(text = "Registriraj") {
-            launcher.launch(googleSignInClient?.signInIntent)
+            launcher.launch(googleSignInClient?.signInIntent!!)
         }
 
         Row(

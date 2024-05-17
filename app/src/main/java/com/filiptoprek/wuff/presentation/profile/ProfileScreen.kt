@@ -493,7 +493,7 @@ fun editingModal(profileViewModel: ProfileViewModel?, aboutUser: String, onAbout
                 },
                 shape = RoundedCornerShape(8.dp),
                 colors = TextFieldDefaults.textFieldColors(
-                    textColor = Color(android.graphics.Color.parseColor("#333333")),
+                    unfocusedTextColor = Color(android.graphics.Color.parseColor("#333333")),
                     containerColor  = Color.White,
                     cursorColor = Color(android.graphics.Color.parseColor("#52B788")),
                     disabledLabelColor = Color.Transparent,
@@ -577,7 +577,7 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                     },
                     shape = RoundedCornerShape(8.dp),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color(android.graphics.Color.parseColor("#333333")),
+                        unfocusedTextColor = Color(android.graphics.Color.parseColor("#333333")),
                         containerColor  = Color.White,
                         cursorColor = Color(android.graphics.Color.parseColor("#52B788")),
                         disabledLabelColor = Color.Transparent,
@@ -611,7 +611,7 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color(android.graphics.Color.parseColor("#333333")),
+                        unfocusedTextColor = Color(android.graphics.Color.parseColor("#333333")),
                         containerColor  = Color.White,
                         cursorColor = Color(android.graphics.Color.parseColor("#52B788")),
                         disabledLabelColor = Color.Transparent,
@@ -644,7 +644,7 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                     },
                     shape = RoundedCornerShape(8.dp),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color(android.graphics.Color.parseColor("#333333")),
+                        unfocusedTextColor = Color(android.graphics.Color.parseColor("#333333")),
                         containerColor  = Color.White,
                         cursorColor = Color(android.graphics.Color.parseColor("#52B788")),
                         disabledLabelColor = Color.Transparent,
@@ -681,7 +681,7 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                     },
                     shape = RoundedCornerShape(8.dp),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color(android.graphics.Color.parseColor("#333333")),
+                        unfocusedTextColor = Color(android.graphics.Color.parseColor("#333333")),
                         containerColor  = Color.White,
                         cursorColor = Color(android.graphics.Color.parseColor("#52B788")),
                         disabledLabelColor = Color.Transparent,

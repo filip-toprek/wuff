@@ -1,6 +1,8 @@
 package com.filiptoprek.wuff.navigation
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -41,9 +43,11 @@ import com.filiptoprek.wuff.presentation.home.HomeScreen
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileScreen
+import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseUser
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupNavGraph(
@@ -51,6 +55,7 @@ fun SetupNavGraph(
     viewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
     homeViewModel: HomeViewModel,
+    reservationViewModel: ReservationViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -164,7 +169,7 @@ fun SetupNavGraph(
             ) {
                 BackHandler(true) {
                 }
-                HomeScreen(navController, homeViewModel)
+                HomeScreen(navController, homeViewModel, reservationViewModel)
             }
             composable(
                 route = Routes.Profile.route
