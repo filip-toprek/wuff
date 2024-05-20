@@ -5,5 +5,6 @@ sealed class Routes(val route: String) {
     object Login : Routes("LoginScreen")
     object Register : Routes("RegisterScreen")
     object Home : Routes("HomeScreen")
+    object Reservations : Routes("ReservationsScreen")
     object Profile : Routes("ProfileScreen")
 }

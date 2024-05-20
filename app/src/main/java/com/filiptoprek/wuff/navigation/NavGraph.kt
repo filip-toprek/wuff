@@ -44,6 +44,7 @@ import com.filiptoprek.wuff.presentation.home.HomeViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileScreen
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
+import com.filiptoprek.wuff.presentation.reservation.ReservationsScreen
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseUser
 
@@ -60,21 +61,21 @@ fun SetupNavGraph(
 ) {
     val items = listOf(
         BottomNavigationItem(
-            title = "Home",
+            title = "Početna",
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Home,
             hasNews = false,
             route = Routes.Home.route
         ),
         BottomNavigationItem(
-            title = "Reservations",
+            title = "Rezervacije",
             selectedIcon = Icons.Filled.CheckCircle,
             unselectedIcon = Icons.Outlined.CheckCircle,
             hasNews = false,
-            route = Routes.Home.route
+            route = Routes.Reservations.route
         ),
         BottomNavigationItem(
-            title = "Profile",
+            title = "Profil",
             selectedIcon = Icons.Filled.Person,
             unselectedIcon = Icons.Outlined.Person,
             hasNews = false,
@@ -175,6 +176,13 @@ fun SetupNavGraph(
                 route = Routes.Profile.route
             ) {
                 ProfileScreen(navController, viewModel, profileViewModel)
+                BackHandler(true) {
+                }
+            }
+            composable(
+                route = Routes.Reservations.route
+            ) {
+                ReservationsScreen(navController, reservationViewModel)
                 BackHandler(true) {
                 }
             }

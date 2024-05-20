@@ -99,6 +99,7 @@ class AuthRepositoryImpl @Inject constructor(
                        aboutUser = "Jako volim ljude i šetnje uz plažu",
                        numOfWalks = 0,
                        user = UserData(
+                           result.user?.uid.toString(),
                            result.user?.displayName.toString(),
                            result.user?.photoUrl.toString())
                    ))

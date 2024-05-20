@@ -41,6 +41,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,10 +67,14 @@ import coil.compose.AsyncImage
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
+import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -80,9 +85,9 @@ fun HomeScreen(
     reservationViewModel: ReservationViewModel,
     ){
     val homeFlow = homeViewModel.homeFlow.collectAsState()
+    val reservationFlow = reservationViewModel.reservationFlow.collectAsState()
     val walkerList = homeViewModel.walkerList.collectAsState()
     val walkTypeList = reservationViewModel.walkTypeList.collectAsState()
-
 
     var isLoading by remember { mutableStateOf(false) }
     var reserved by remember { mutableStateOf(false) }
@@ -142,7 +147,10 @@ fun HomeScreen(
                         )
                     }
                     is Resource.Success -> {
-                        reserveWalk(selectedWalker.value, selectedText, walkTypeList.value)
+                        val onReserve: (Boolean) -> Unit = { newValue ->
+                            reserved = newValue
+                        }
+                        reserveWalk(selectedWalker.value, selectedText, walkTypeList.value, reservationViewModel, reservationFlow, onReserve)
                     }
                 }
             }
@@ -178,15 +186,12 @@ fun HomeScreen(
                         val onReserve: (Boolean) -> Unit = { newValue ->
                             reserved = newValue
                         }
-                        walkerTab(walkerList.value, onReserve, selectedWalker    )
+                        walkerTab(walkerList.value, onReserve, selectedWalker)
                     }
                 }
-
             }
         }
-
     }
-
 }
 
 @Composable
@@ -314,8 +319,18 @@ fun walkerTab(walkerList: List<UserProfile?>, onReserve: (Boolean) -> Unit, sele
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>, walkTypes: List<WalkType?>)
+fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>, walkTypes: List<WalkType?>, reservationViewModel: ReservationViewModel, reservationFlow: State<Resource<Any>?>, onReserve: (Boolean) -> Unit)
 {
+    var dateString = remember {
+        mutableStateOf("")
+    }
+
+    var timeString = remember {
+        mutableStateOf("")
+    }
+
+    var isError by remember { mutableStateOf(false) }
+    var errorText by remember { mutableStateOf("") }
 
         Row(
             modifier = Modifier
@@ -372,16 +387,19 @@ fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>
                     )
                 )
                 Spacer(modifier = Modifier.size(10.dp))
-
+                if (isError){
+                    Text(
+                        text = errorText,
+                        style = TextStyle(
+                            fontFamily = Opensans,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.Red
+                        )
+                    )
+                }
                 dropDownMenu(selectedText, walkTypes)
-
-                var dateString = remember {
-                    mutableStateOf("")
-                }
-
-                var timeString = remember {
-                    mutableStateOf("")
-                }
 
                 dateTimePickers(dateString, timeString)
 
@@ -401,6 +419,25 @@ fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>
                     )
                 )
                 Spacer(modifier = Modifier.size(10.dp))
+
+                reservationFlow.value?.let {
+                    when(it){
+                        is Resource.Failure -> {
+
+                        }
+                        Resource.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
+                                    .wrapContentHeight(Alignment.CenterVertically),
+                                color = colorResource(R.color.green_accent)
+                            )
+                        }
+                        is Resource.Success -> {
+                        }
+                    }
+                }
                 Button(modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally)
@@ -411,7 +448,33 @@ fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>
                         containerColor = colorResource(R.color.green_accent)
                     ),
                     onClick = {
+                        isError = false
+                        if(selectedText.value == "Odaberite vrstu šetnje")
+                        {
+                            isError = true
+                            errorText = "Molimo odaberite vrstu šetnje"
+                            return@Button
+                        }
 
+                        if(dateString.value.isEmpty())
+                        {
+                            isError = true
+                            errorText = "Molimo unesite datum šetnje"
+                            return@Button
+                        }
+
+                        if(timeString.value.isEmpty())
+                        {
+                            isError = true
+                            errorText = "Molimo unesite vrijeme šetnje"
+                            return@Button
+                        }
+
+                        reservationViewModel.createReservation(Reservation("", selectedWalker?.user?.uid.toString(),"", dateString.value
+                                , timeString.value,false,false, walkTypes.find { it?.walkName == selectedText.value }?.walkPrice!!,
+                            walkType = walkTypes.find { type -> type?.walkName == selectedText.value }!!
+                        ))
+                        onReserve(false)
                     })
                 {
                     Text(
@@ -594,6 +657,7 @@ fun dropDownMenu(selectedText: MutableState<String>, walkTypes: List<WalkType?>)
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<String>)
@@ -704,10 +768,16 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
                         val month = selectedDate.get(Calendar.MONTH) + 1 // Months are zero-based!!!!!!
                         val dayOfMonth = selectedDate.get(Calendar.DAY_OF_MONTH)
 
+                        val formattedMonth = String.format("%02d", month)
+                        val formattedDay = String.format("%02d", dayOfMonth)
 
-                        dateString.value = "$dayOfMonth/$month/$year"
+                        dateString.value = "$formattedDay/$formattedMonth/$year"
 
-                        if (selectedDate.after(Calendar.getInstance())) {
+                        if (selectedDate.timeInMillis >= Calendar.getInstance().apply {
+                                set(Calendar.HOUR_OF_DAY, 0)
+                                set(Calendar.MINUTE, 0)
+                                set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0) }.timeInMillis) {
                             Toast.makeText(
                                 context,
                                 "Odabrani datum ${dateString.value}",
@@ -798,20 +868,25 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
 
                         timeString.value = "${hours}:${minutes}"
 
-                        if (hours >= currentTime.time.hours && minutes >= currentTime.time.minutes) {
-                            Toast.makeText(
-                                context,
-                                "Odabrano vrijeme je ${hours}:${minutes}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            showTimePicker = false
-                        } else {
+                        val year = currentTime.get(Calendar.YEAR)
+                        val month = currentTime.get(Calendar.MONTH) + 1 // Months are zero-based!!!!!!
+                        val dayOfMonth = currentTime.get(Calendar.DAY_OF_MONTH)
+                        val currentDate = "$dayOfMonth/$month/$year"
+
+                        if (((hours <= currentTime.time.hours) && dateString.value == currentDate)) {
                             timeString.value = ""
                             Toast.makeText(
                                 context,
                                 "Odabrano vijreme mora biti u budućnosti",
                                 Toast.LENGTH_SHORT
                             ).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Odabrano vrijeme je ${hours}:${minutes}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            showTimePicker = false
                         }
                     }
                 ) { Text(

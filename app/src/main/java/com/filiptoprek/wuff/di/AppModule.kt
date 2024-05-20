@@ -16,6 +16,7 @@ import com.filiptoprek.wuff.domain.usecase.auth.ValidateEmailUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateNameUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidatePasswordUseCase
 import com.filiptoprek.wuff.domain.usecase.profile.ValidateAboutUserUseCase
+import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -84,6 +85,12 @@ object AppModule {
     @Singleton
     fun provideValidateAboutUserUseCase(): ValidateAboutUserUseCase {
         return ValidateAboutUserUseCase()
+    }
+
+    @Provides
+    @Singleton
+    fun provideValidateReservationUseCase(): ValidateReservationUseCase {
+        return ValidateReservationUseCase()
     }
 
 }

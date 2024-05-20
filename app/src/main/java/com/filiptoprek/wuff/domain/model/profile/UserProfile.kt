@@ -8,11 +8,11 @@ data class UserProfile(
     val dateCreated: Long = System.currentTimeMillis(),
     val dateUpdated: Long = System.currentTimeMillis(),
     val transactions: List<Transaction> = listOf(),
-    val walks: List<Walk> = listOf(),
     val walker: Walker? = null,
 )
 
 data class UserData(
+    val uid: String = "",
     val name: String = "",
     val profilePhotoUrl: String = ""
 )
@@ -36,11 +36,4 @@ data class Transaction(
     val date: Long,
     val amount: Double,
     val isSuccessful: Boolean
-)
-
-data class Walk(
-    val walkerUserId: String,
-    val dateOfWalk: Long,
-    val isCompleted: Boolean = false,
-    val price: Double
 )
