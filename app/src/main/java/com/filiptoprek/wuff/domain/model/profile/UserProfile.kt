@@ -3,6 +3,7 @@ package com.filiptoprek.wuff.domain.model.profile
 data class UserProfile(
     val user: UserData = UserData(),
     val balance: Double = 0.0,
+    val pendingBalance: Double = 0.0,
     val aboutUser: String = "",
     val numOfWalks: Int = 0,
     val dateCreated: Long = System.currentTimeMillis(),

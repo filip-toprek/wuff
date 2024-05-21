@@ -2,12 +2,14 @@ package com.filiptoprek.wuff.presentation.reservation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,12 +18,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,13 +50,18 @@ import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
+import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.delay
 
 @Composable
 fun ReservationsScreen(
     navController: NavHostController = rememberNavController(),
     reservationViewModel: ReservationViewModel,
+    profileViewModel: ProfileViewModel
 ) {
     val reservationFlow = reservationViewModel.reservationFlow.collectAsState()
     val reservationList = reservationViewModel.reservationsList.collectAsState()
@@ -122,6 +131,7 @@ fun ReservationsScreen(
                     }
                 }
                 if (isLoading) {
+                    profileViewModel.refreshUser()
                     CircularProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -133,7 +143,7 @@ fun ReservationsScreen(
                     val onDetailsChange: (Boolean) -> Unit = { newValue ->
                         isInDetails = newValue
                     }
-                    reservationCard(reservationList.value, onDetailsChange, reservationViewModel, reservationFlow)
+                    reservationCard(reservationList.value, onDetailsChange, reservationViewModel, reservationFlow, profileViewModel.userProfile?.walker?.approved)
                 }
             }
         }
@@ -144,7 +154,8 @@ fun reservationCard(
     reservationList: List<Reservation?>,
     onDetailsChange: (Boolean) -> Unit,
     reservationViewModel: ReservationViewModel,
-    reservationFlow: State<Resource<Any>?>
+    reservationFlow: State<Resource<Any>?>,
+    approvedWalker: Boolean?
 )
 {
     var isDetailsClicked by remember { mutableStateOf(false) }
@@ -155,7 +166,7 @@ fun reservationCard(
     }
     if(isDetailsClicked)
     {
-        reservationDetails(selectedReservation.walker, selectedReservation, onBackClick, reservationViewModel, reservationFlow)
+        reservationDetails(selectedReservation, onBackClick, reservationViewModel, reservationFlow, approvedWalker)
     }else {
         if(reservationList.isEmpty())
         {
@@ -180,73 +191,111 @@ fun reservationCard(
                 )
             }
         }
-        reservationList.forEach { reservation ->
-            Row(
-                modifier = Modifier
-                    .padding(top = 15.dp)
-                    .wrapContentWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
+        var refreshing by remember { mutableStateOf(false) }
+        LaunchedEffect(refreshing) {
+            if (refreshing) {
+                reservationViewModel.refreshReservations()
+                delay(2000)
+                refreshing = false
+            }
+        }
 
-                ) {
-                AsyncImage(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(90.dp))
-                        .height(40.dp),
-                    model = reservation?.walker?.user?.profilePhotoUrl,
-                    placeholder = painterResource(id = R.drawable.user_placeholder),
-                    error = painterResource(id = R.drawable.user_placeholder),
-                    contentDescription = "User image",
-                )
-                Spacer(modifier = Modifier.size(35.dp))
-                Column {
-                    Text(
-                        text = reservation?.walker?.user?.name.toString(),
-                        color = colorResource(R.color.gray),
-                        style = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            color = Color.White
-                        )
-                    )
-                    Text(
-                        text = "${reservation?.price.toString()}€",
-                        color = colorResource(R.color.gray),
-                        style = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center,
-                            color = colorResource(R.color.box_bkg_white)
-                        )
-                    )
-                }
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing = refreshing),
+            onRefresh = { refreshing = true },
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight()
+            ) {
 
-                Spacer(modifier = Modifier.weight(1f))
-                Button(modifier = Modifier.size(width = 115.dp, height = 40.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.green_accent)
-                    ),
-                    contentPadding = PaddingValues(0.dp),
-                    onClick = {
-                        selectedReservation = reservation!!
-                        isDetailsClicked = true
-                    })
-                {
-                    Text(
-                        modifier = Modifier,
-                        text = "Detalji",
-                        style = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            color = Color.White
-                        )
-                    )
+                items(reservationList.size) {
+
+                    reservationList.forEach loop@{ reservation ->
+                        //            if(approvedWalker == true)
+                        //            {
+                        //                if(reservation?.declined == true)
+                        //                {
+                        //                    return@loop
+                        //                }
+                        //            }
+
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 15.dp)
+                                .wrapContentWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+
+                            ) {
+                            AsyncImage(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(90.dp))
+                                    .height(40.dp),
+                                model = if (approvedWalker == true) {
+                                    reservation?.user?.user?.profilePhotoUrl
+                                } else {
+                                    reservation?.walker?.user?.profilePhotoUrl
+                                },
+                                placeholder = painterResource(id = R.drawable.user_placeholder),
+                                error = painterResource(id = R.drawable.user_placeholder),
+                                contentDescription = "User image",
+                            )
+                            Spacer(modifier = Modifier.size(35.dp))
+                            Column {
+                                Text(
+                                    text = if (approvedWalker == true) {
+                                        reservation?.user?.user?.name.toString()
+                                    } else {
+                                        reservation?.walker?.user?.name.toString()
+                                    },
+                                    color = colorResource(R.color.gray),
+                                    style = TextStyle(
+                                        fontFamily = Opensans,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        color = Color.White
+                                    )
+                                )
+                                Text(
+                                    text = "${reservation?.price.toString()}€",
+                                    color = colorResource(R.color.gray),
+                                    style = TextStyle(
+                                        fontFamily = Opensans,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        textAlign = TextAlign.Center,
+                                        color = colorResource(R.color.box_bkg_white)
+                                    )
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.weight(1f))
+                            Button(modifier = Modifier.size(width = 115.dp, height = 40.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = colorResource(R.color.green_accent)
+                                ),
+                                contentPadding = PaddingValues(0.dp),
+                                onClick = {
+                                    selectedReservation = reservation!!
+                                    isDetailsClicked = true
+                                })
+                            {
+                                Text(
+                                    modifier = Modifier,
+                                    text = "Detalji",
+                                    style = TextStyle(
+                                        fontFamily = Opensans,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        color = Color.White
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -256,11 +305,11 @@ fun reservationCard(
 
 @Composable
 fun reservationDetails(
-    walker: UserProfile?,
     reservation: Reservation,
     onBackClick: (Boolean) -> Unit,
     reservationViewModel: ReservationViewModel,
-    reservationFlow: State<Resource<Any>?>
+    reservationFlow: State<Resource<Any>?>,
+    approvedWalker: Boolean?
 )
 {
     Row(
@@ -301,14 +350,26 @@ fun reservationDetails(
                         shape = RoundedCornerShape(90.dp)
                     )
                     .size(100.dp),
-                model = walker?.user?.profilePhotoUrl,
+                model = if(approvedWalker == true)
+                {
+                    reservation.user?.user?.profilePhotoUrl
+                }else
+                {
+                    reservation.walker?.user?.profilePhotoUrl
+                },
                 placeholder = painterResource(id = R.drawable.user_placeholder),
                 error = painterResource(id = R.drawable.user_placeholder),
                 contentDescription = "User image",
             )
             Spacer(modifier = Modifier.size(15.dp))
             Text(
-                text = walker?.user?.name.toString(),
+                text = if(approvedWalker == true)
+                {
+                    reservation.user?.user?.name.toString()
+                }else
+                {
+                    reservation.walker?.user?.name.toString()
+                },
                 style = TextStyle(
                     fontFamily = Opensans,
                     fontSize = 18.sp,
@@ -329,7 +390,28 @@ fun reservationDetails(
                     color = Color.Gray
                 )
             )
-
+            Spacer(modifier = Modifier.size(10.dp))
+            Text(
+                text = "${reservation.dateOfWalk}",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = Color.Gray
+                )
+            )
+            Spacer(modifier = Modifier.size(10.dp))
+            Text(
+                text = "${reservation.timeOfWalk}",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = Color.Gray
+                )
+            )
             Spacer(modifier = Modifier.size(10.dp))
             Text(
                 text = "${reservation.price} €",
@@ -342,16 +424,43 @@ fun reservationDetails(
                 )
             )
             Spacer(modifier = Modifier.size(10.dp))
-            Text(
-                text = if(reservation.accepted) "Rezervacija je prihvaćena" else "Rezervacija nije još prihvaćena",
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = if(reservation.accepted) colorResource(R.color.green_accent) else Color.Red
+            if(reservation.declined && approvedWalker == null)
+            {
+                Text(
+                    text = "Rezervacija je odbijena",
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = if(reservation.accepted) colorResource(R.color.green_accent) else Color.Red
+                    )
                 )
-            )
+            }else if(!reservation.completed)
+            {
+                Text(
+                    text = if(reservation.accepted) "Rezervacija je prihvaćena" else "Rezervacija nije još prihvaćena",
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = if(reservation.accepted) colorResource(R.color.green_accent) else Color.Red
+                    )
+                )
+            }else if (reservation.completed)
+            {
+                Text(
+                    text = "Šetnja je završena",
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = colorResource(R.color.green_accent)
+                    )
+                )
+            }
             Spacer(modifier = Modifier.size(10.dp))
             Button(modifier = Modifier
                 .fillMaxWidth()
@@ -378,6 +487,35 @@ fun reservationDetails(
                     )
                 )
             }
+            if(approvedWalker == true && !reservation.accepted)
+            {
+                Button(modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .width(IntrinsicSize.Max),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.green_accent)
+                    ),
+                    onClick = {
+                        reservationViewModel.acceptReservation(reservation)
+                        onBackClick(false)
+                    })
+                {
+                    Text(
+                        modifier = Modifier,
+                        text = "Prihvati šetnju",
+                        style = TextStyle(
+                            fontFamily = Opensans,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.White
+                        )
+                    )
+                }
+            }
             reservationFlow.value?.let {
                 when(it){
                     is Resource.Failure -> {
@@ -395,6 +533,63 @@ fun reservationDetails(
                     }
                 }
             }
+            if(approvedWalker == true && reservation.accepted && !reservation.completed && !reservation.started)
+            {
+                Button(modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .width(IntrinsicSize.Max),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.green_accent)
+                    ),
+                    onClick = {
+                        reservationViewModel.startWalk(reservation)
+                        onBackClick(false)
+                    })
+                {
+                    Text(
+                        modifier = Modifier,
+                        text = "Započni šetnju",
+                        style = TextStyle(
+                            fontFamily = Opensans,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.White
+                        )
+                    )
+                }
+            }else if(approvedWalker == true && reservation.started && reservation.accepted && !reservation.completed)
+            {
+                Button(modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .width(IntrinsicSize.Max),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red
+                    ),
+                    onClick = {
+                        reservationViewModel.endWalk(reservation)
+                        onBackClick(false)
+                    })
+                {
+                    Text(
+                        modifier = Modifier,
+                        text = "Završi šetnju",
+                        style = TextStyle(
+                            fontFamily = Opensans,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.White
+                        )
+                    )
+                }
+            }
             if(!reservation.accepted) {
                 Button(modifier = Modifier
                     .fillMaxWidth()
@@ -406,13 +601,30 @@ fun reservationDetails(
                         containerColor = Color.Red
                     ),
                     onClick = {
-                        reservationViewModel.deleteReservation(reservation)
+                        if(approvedWalker == true)
+                        {
+                            reservationViewModel.declineReservation(reservation)
+                        }else{
+                            reservationViewModel.deleteReservation(reservation)
+                        }
                         onBackClick(false)
                     })
                 {
                     Text(
                         modifier = Modifier,
-                        text = "Otkaži šetnju",
+                        text = if(approvedWalker == true)
+                        {
+                            "Odbij šetnju"
+                        }else
+                        {
+                            if(reservation.declined)
+                            {
+                                "Obriši šetnju"
+                            }else
+                            {
+                                "Otkaži šetnju"
+                            }
+                        },
                         style = TextStyle(
                             fontFamily = Opensans,
                             fontSize = 15.sp,

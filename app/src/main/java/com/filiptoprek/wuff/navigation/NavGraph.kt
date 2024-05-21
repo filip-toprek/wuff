@@ -170,7 +170,7 @@ fun SetupNavGraph(
             ) {
                 BackHandler(true) {
                 }
-                HomeScreen(navController, homeViewModel, reservationViewModel)
+                HomeScreen(navController, homeViewModel, reservationViewModel, profileViewModel)
             }
             composable(
                 route = Routes.Profile.route
@@ -182,7 +182,7 @@ fun SetupNavGraph(
             composable(
                 route = Routes.Reservations.route
             ) {
-                ReservationsScreen(navController, reservationViewModel)
+                ReservationsScreen(navController, reservationViewModel, profileViewModel)
                 BackHandler(true) {
                 }
             }

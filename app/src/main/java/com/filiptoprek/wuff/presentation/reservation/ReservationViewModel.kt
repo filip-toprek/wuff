@@ -9,6 +9,7 @@ import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.filiptoprek.wuff.domain.repository.home.HomeRepository
+import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,11 +24,15 @@ class ReservationViewModel @Inject constructor(
     private val reservationRepository: ReservationRepository,
     private val authRepository: AuthRepository,
     private val homeRepository: HomeRepository,
-    private val validateReservationUseCase: ValidateReservationUseCase
+    private val validateReservationUseCase: ValidateReservationUseCase,
+    private val profileRepository: ProfileRepository
 ): ViewModel(){
 
     private val _reservationFlow = MutableStateFlow<Resource<Any>?>(null)
     val reservationFlow: StateFlow<Resource<Any>?> = _reservationFlow
+
+    private val _reservationCreateFlow = MutableStateFlow<Resource<Any>?>(null)
+    val reservationCreateFlow: StateFlow<Resource<Any>?> = _reservationCreateFlow
 
     private val _walkTypeList = MutableStateFlow<List<WalkType?>>(emptyList())
     val walkTypeList: StateFlow<List<WalkType?>> = _walkTypeList
@@ -35,30 +40,47 @@ class ReservationViewModel @Inject constructor(
     private val _reservationsList = MutableStateFlow<List<Reservation?>>(emptyList())
     val reservationsList: StateFlow<List<Reservation?>> = _reservationsList
 
+
     init {
         if (_walkTypeList.value == emptyList<UserProfile?>()) {
             getWalkTypeList()
         }
         if (_reservationsList.value == emptyList<Reservation?>()) {
-            getReservationsList()
+            observeCurrentUser()
         }
+    }
+
+    private fun observeCurrentUser() {
+        authRepository.currentUserLiveData.observeForever { currentUser ->
+            if (currentUser != null) {
+                viewModelScope.launch {
+                    getReservationsList()
+                }
+            }
+        }
+    }
+
+    override fun onCleared() {
+        authRepository.currentUserLiveData.removeObserver {  }
+        super.onCleared()
     }
 
     fun createReservation(reservation: Reservation) {
         if(validateReservationUseCase.validateReservationUseCase(reservation))
         {
             viewModelScope.launch {
-                _reservationFlow.value = Resource.Loading
+                _reservationCreateFlow.value = Resource.Loading
                 reservation.userId = authRepository.currentUser?.uid.toString()
                 val result = reservationRepository.createReservation(reservation)
 
                 if(result != Resource.Success(Unit))
                 {
-                    _reservationFlow.value = Resource.Failure(Exception("Error"))
+                    _reservationCreateFlow.value = result
                 }else
                 {
                     getReservationsList()
-                    _reservationFlow.value = Resource.Success(Unit)
+                    _reservationCreateFlow.value = Resource.Success(reservation)
+                    _reservationCreateFlow.value = null
                 }
             }
         }else
@@ -67,17 +89,32 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    fun refreshReservations()
+    {
+        _reservationsList.value = emptyList<Reservation>()
+        getReservationsList()
+    }
+
     private fun getReservationsList() {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
-            var result = reservationRepository.getReservations(authRepository.currentUser?.uid.toString())
+            var result = if(profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())?.walker?.approved == true)
+            {
+                reservationRepository.getReservationsForWalker(authRepository.currentUser?.uid.toString())
+            }else{
+                reservationRepository.getReservations(authRepository.currentUser?.uid.toString())
+            }
 
             if(result == emptyList<Reservation>())
             {
-                _reservationFlow.value = Resource.Failure(Exception("Error"))
+                _reservationFlow.value = Resource.Failure(Exception("Error reservation list"))
             }else
             {
-                result = getWalker(result)
+                result = if(profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())?.walker?.approved == true) {
+                    getUser(result)
+                }else{
+                    getWalker(result)
+                }
                 _reservationsList.value = result
                 _reservationFlow.value = Resource.Success(result)
             }
@@ -88,6 +125,45 @@ class ReservationViewModel @Inject constructor(
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
             val result = reservationRepository.deleteReservations(reservation.reservationId)
+            _reservationFlow.value = result
+            _reservationsList.value = emptyList<Reservation>()
+            getReservationsList()
+        }
+    }
+
+    fun startWalk(reservation: Reservation) {
+        viewModelScope.launch {
+            _reservationFlow.value = Resource.Loading
+            val result = reservationRepository.startWalk(reservation.reservationId)
+            _reservationFlow.value = result
+            _reservationsList.value = emptyList<Reservation>()
+            getReservationsList()
+        }
+    }
+
+    fun endWalk(reservation: Reservation) {
+        viewModelScope.launch {
+            _reservationFlow.value = Resource.Loading
+            val result = reservationRepository.endWalk(reservation)
+            _reservationFlow.value = result
+            _reservationsList.value = emptyList<Reservation>()
+            getReservationsList()
+        }
+    }
+
+    fun acceptReservation(reservation: Reservation) {
+        viewModelScope.launch {
+            _reservationFlow.value = Resource.Loading
+            val result = reservationRepository.acceptReservations(reservation.reservationId)
+            _reservationFlow.value = result
+            _reservationsList.value = emptyList<Reservation>()
+            getReservationsList()
+        }
+    }
+    fun declineReservation(reservation: Reservation) {
+        viewModelScope.launch {
+            _reservationFlow.value = Resource.Loading
+            val result = reservationRepository.declineReservations(reservation.reservationId)
             _reservationFlow.value = result
             _reservationsList.value = emptyList<Reservation>()
             getReservationsList()
@@ -108,6 +184,15 @@ class ReservationViewModel @Inject constructor(
         return resList
     }
 
+    private suspend fun getUser(resList: List<Reservation>) : List<Reservation>
+    {
+        for (reservation in resList)
+        {
+            reservation.user = profileRepository.getUserProfile(reservation.userId)
+        }
+        return resList
+    }
+
     private fun getWalkTypeList() {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
@@ -115,7 +200,7 @@ class ReservationViewModel @Inject constructor(
 
             if(result == emptyList<WalkType>())
             {
-                _reservationFlow.value = Resource.Failure(Exception("Error"))
+                _reservationFlow.value = Resource.Failure(Exception("Error reservation walk types"))
             }else
             {
                 _walkTypeList.value = result

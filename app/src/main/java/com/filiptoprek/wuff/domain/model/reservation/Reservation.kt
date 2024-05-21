@@ -12,7 +12,10 @@ data class Reservation (
     val timeOfWalk: String? = "",
     val accepted: Boolean = false,
     val completed: Boolean = false,
+    val declined: Boolean = false,
+    val started: Boolean = false,
     val price: Double = 0.0,
     val walkType: WalkType = WalkType(),
-    var walker: UserProfile? = null
+    var walker: UserProfile? = null,
+    var user: UserProfile? = null
 )

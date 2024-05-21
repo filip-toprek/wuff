@@ -31,6 +31,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    val userProfile: UserProfile?
+        get() {
+            return profile
+        }
+
     private fun observeCurrentUser() {
         authRepository.currentUserLiveData.observeForever { currentUser ->
             if (currentUser != null) {
@@ -46,10 +51,10 @@ class ProfileViewModel @Inject constructor(
         super.onCleared()
     }
 
-    val userProfile: UserProfile?
-        get() {
-            return profile
-        }
+    fun refreshUser()
+    {
+        loadUserProfile()
+    }
 
     fun becomeWalker(userProfile: UserProfile) {
         viewModelScope.launch {
@@ -60,7 +65,7 @@ class ProfileViewModel @Inject constructor(
             )
             if(result == null)
             {
-                _profileFlow.value = Resource.Failure(Exception("Error"))
+                _profileFlow.value = Resource.Failure(Exception("Error profile"))
             }else
             {
                 _profileFlow.value = result
@@ -84,7 +89,7 @@ class ProfileViewModel @Inject constructor(
             )
             if(result == null)
             {
-                _profileFlow.value = Resource.Failure(Exception("Error"))
+                _profileFlow.value = Resource.Failure(Exception("Error profile 2"))
             }else
             {
                 _profileFlow.value = result
@@ -100,7 +105,7 @@ class ProfileViewModel @Inject constructor(
             val result = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
             if(result == null)
             {
-                _profileFlow.value = Resource.Failure(Exception("Error"))
+                _profileFlow.value = Resource.Failure(Exception("Error profile 3"))
             }else
             {
                 profile = result

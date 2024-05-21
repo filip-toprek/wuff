@@ -69,6 +69,8 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
+import com.filiptoprek.wuff.presentation.auth.AuthViewModel
+import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
@@ -83,9 +85,11 @@ fun HomeScreen(
     navController: NavHostController,
     homeViewModel: HomeViewModel,
     reservationViewModel: ReservationViewModel,
+    profileViewModel: ProfileViewModel
     ){
     val homeFlow = homeViewModel.homeFlow.collectAsState()
     val reservationFlow = reservationViewModel.reservationFlow.collectAsState()
+    val reservationCreateFlow = reservationViewModel.reservationCreateFlow.collectAsState()
     val walkerList = homeViewModel.walkerList.collectAsState()
     val walkTypeList = reservationViewModel.walkTypeList.collectAsState()
 
@@ -150,7 +154,7 @@ fun HomeScreen(
                         val onReserve: (Boolean) -> Unit = { newValue ->
                             reserved = newValue
                         }
-                        reserveWalk(selectedWalker.value, selectedText, walkTypeList.value, reservationViewModel, reservationFlow, onReserve)
+                        reserveWalk(selectedWalker.value, selectedText, walkTypeList.value, reservationViewModel, reservationCreateFlow, onReserve)
                     }
                 }
             }
@@ -183,10 +187,17 @@ fun HomeScreen(
                             color = colorResource(R.color.green_accent)
                         )
                     }else {
-                        val onReserve: (Boolean) -> Unit = { newValue ->
-                            reserved = newValue
+
+                        if(profileViewModel.userProfile?.walker?.approved == true)
+                        {
+
+                        }else
+                        {
+                            val onReserve: (Boolean) -> Unit = { newValue ->
+                                reserved = newValue
+                            }
+                            walkerTab(walkerList.value, onReserve, selectedWalker)
                         }
-                        walkerTab(walkerList.value, onReserve, selectedWalker)
                     }
                 }
             }
@@ -423,7 +434,8 @@ fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>
                 reservationFlow.value?.let {
                     when(it){
                         is Resource.Failure -> {
-
+                            isError = true
+                            errorText = it.exception.message.toString()
                         }
                         Resource.Loading -> {
                             CircularProgressIndicator(
@@ -456,25 +468,22 @@ fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>
                             return@Button
                         }
 
-                        if(dateString.value.isEmpty())
-                        {
-                            isError = true
-                            errorText = "Molimo unesite datum šetnje"
-                            return@Button
-                        }
-
-                        if(timeString.value.isEmpty())
-                        {
-                            isError = true
-                            errorText = "Molimo unesite vrijeme šetnje"
-                            return@Button
-                        }
-
                         reservationViewModel.createReservation(Reservation("", selectedWalker?.user?.uid.toString(),"", dateString.value
-                                , timeString.value,false,false, walkTypes.find { it?.walkName == selectedText.value }?.walkPrice!!,
+                                , timeString.value,false,false, false, false, walkTypes.find { it?.walkName == selectedText.value }?.walkPrice!!,
                             walkType = walkTypes.find { type -> type?.walkName == selectedText.value }!!
                         ))
-                        onReserve(false)
+
+                        reservationFlow.value?.let {
+                            when(it){
+                                is Resource.Failure -> {
+                                }
+                                Resource.Loading -> {
+                                }
+                                is Resource.Success -> {
+                                    onReserve(false)
+                                }
+                            }
+                        }
                     })
                 {
                     Text(

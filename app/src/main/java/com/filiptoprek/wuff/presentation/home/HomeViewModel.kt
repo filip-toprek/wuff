@@ -35,9 +35,9 @@ class HomeViewModel @Inject constructor(
             _homeFlow.value = Resource.Loading
             val result = homeRepository.getWalkerList()
 
-            if(result == null)
+            if(result.isEmpty())
             {
-                _homeFlow.value = Resource.Failure(Exception("Error"))
+                _homeFlow.value = Resource.Failure(Exception("Error home"))
             }else
             {
                 _walkerList.value = result

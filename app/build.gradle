@@ -63,6 +63,8 @@ dependencies {
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.navigation:navigation-runtime-ktx:2.5.2'
 
+    implementation 'com.google.accompanist:accompanist-swiperefresh:0.24.13-rc'
+
     implementation("androidx.credentials:credentials:<latest version>")
     implementation("androidx.credentials:credentials-play-services-auth:<latest version>")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
