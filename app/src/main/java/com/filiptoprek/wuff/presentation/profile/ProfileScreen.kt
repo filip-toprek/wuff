@@ -566,13 +566,7 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                     ),
                     label = { Text("Broj mobitela", color = colorResource(R.color.gray)) },
                     supportingText = {
-                        /*if (isError) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "Opis može biti najviše 50 znakova.",
-                                color = Color.Red
-                            )
-                        }*/
+
                     },
                     onValueChange = {newValue ->
                         if (newValue.all { it.isDigit() } && newValue.length <= 10) {

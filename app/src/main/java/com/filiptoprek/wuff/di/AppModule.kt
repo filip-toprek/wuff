@@ -6,10 +6,12 @@ import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.data.repository.auth.AuthRepositoryImpl
 import com.filiptoprek.wuff.data.repository.home.HomeRepositoryImpl
 import com.filiptoprek.wuff.data.repository.profile.ProfileRepositoryImpl
+import com.filiptoprek.wuff.data.repository.reload.ReloadRepositoryImpl
 import com.filiptoprek.wuff.data.repository.reservation.ReservationRepositoryImpl
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.filiptoprek.wuff.domain.repository.home.HomeRepository
 import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
+import com.filiptoprek.wuff.domain.repository.reload.ReloadRepository
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateEmailUseCase
@@ -55,6 +57,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideHomeRepository(impl: HomeRepositoryImpl): HomeRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideReloadRepository(impl: ReloadRepositoryImpl): ReloadRepository = impl
 
     @Provides
     @Singleton

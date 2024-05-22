@@ -1,5 +1,7 @@
 package com.filiptoprek.wuff.domain.model.profile
 
+import com.google.firebase.Timestamp
+
 data class UserProfile(
     val user: UserData = UserData(),
     val balance: Double = 0.0,
@@ -33,8 +35,8 @@ data class Review(
 )
 
 data class Transaction(
-    val id: String,
-    val date: Long,
-    val amount: Double,
-    val isSuccessful: Boolean
+    val id: String = "",
+    val date: Timestamp = Timestamp.now(),
+    val amount: Double = 0.0,
+    val isSuccessful: Boolean = false
 )

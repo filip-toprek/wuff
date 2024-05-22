@@ -3,7 +3,12 @@ package com.filiptoprek.wuff.navigation
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
@@ -26,9 +31,12 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,6 +51,7 @@ import com.filiptoprek.wuff.presentation.home.HomeScreen
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileScreen
+import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationsScreen
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -57,6 +66,7 @@ fun SetupNavGraph(
     profileViewModel: ProfileViewModel,
     homeViewModel: HomeViewModel,
     reservationViewModel: ReservationViewModel,
+    reloadViewModel: ReloadViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -88,51 +98,57 @@ fun SetupNavGraph(
     val currentUser: FirebaseUser? by viewModel.currentUserLiveData.observeAsState()
 
     Scaffold(
+        modifier = Modifier.fillMaxWidth(),
+        containerColor = colorResource(R.color.background_white),
         bottomBar = {
             if (currentUser != null) {
-                NavigationBar(
-                    containerColor = colorResource(R.color.gray),
-                    contentColor = colorResource(R.color.green_accent)
-                ){
-                    items.forEachIndexed { index, item ->
-                        NavigationBarItem(
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = colorResource(R.color.green_accent),
-                                unselectedIconColor = Color(255,255,255,50),
-                                indicatorColor = colorResource(R.color.gray)
-                            ),
-                            selected = index == selectedItemIndex,
-                            onClick = {
-                                selectedItemIndex = index
-                                navController.navigate(item.route){
-                                    popUpTo(item.route) { inclusive = true }
-                                }
-                            },
-                            label = {
-                                Text(text = item.title)
-                            },
-                            alwaysShowLabel = false,
-                            icon = {
-                                BadgedBox(
-                                    badge = {
-                                        if (item.badgeCount != null) {
-                                            Badge {
-                                                Text(text = item.badgeCount.toString())
-                                            }
-                                        } else if (item.hasNews) {
-                                            Badge()
-                                        }
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    NavigationBar(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50.dp, 50.dp, 50.dp, 50.dp)).width(200.dp),
+                        containerColor = colorResource(R.color.gray),
+                        contentColor = colorResource(R.color.green_accent),
+                    ) {
+                        items.forEachIndexed { index, item ->
+                            NavigationBarItem(
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = colorResource(R.color.green_accent),
+                                    unselectedIconColor = Color(255, 255, 255, 50),
+                                    indicatorColor = colorResource(R.color.gray)
+                                ),
+                                selected = index == selectedItemIndex,
+                                onClick = {
+                                    selectedItemIndex = index
+                                    navController.navigate(item.route) {
+                                        popUpTo(item.route) { inclusive = true }
                                     }
-                                ) {
-                                    Icon(
-                                        imageVector = if (selectedItemIndex == index) {
-                                            item.selectedIcon
-                                        } else item.unselectedIcon,
-                                        contentDescription = item.title,
-                                    )
+                                },
+                                alwaysShowLabel = false,
+                                icon = {
+                                    BadgedBox(
+                                        badge = {
+                                            if (item.badgeCount != null) {
+                                                Badge {
+                                                    Text(text = item.badgeCount.toString())
+                                                }
+                                            } else if (item.hasNews) {
+                                                Badge()
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = if (selectedItemIndex == index) {
+                                                item.selectedIcon
+                                            } else item.unselectedIcon,
+                                            contentDescription = item.title,
+                                        )
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
@@ -170,7 +186,7 @@ fun SetupNavGraph(
             ) {
                 BackHandler(true) {
                 }
-                HomeScreen(navController, homeViewModel, reservationViewModel, profileViewModel)
+                HomeScreen(navController, homeViewModel, reservationViewModel, profileViewModel, reloadViewModel)
             }
             composable(
                 route = Routes.Profile.route
