@@ -1,5 +1,6 @@
 package com.filiptoprek.wuff.domain.model.profile
 
+import com.filiptoprek.wuff.domain.model.rating.Review
 import com.google.firebase.Timestamp
 
 data class UserProfile(
@@ -26,12 +27,6 @@ data class Walker(
     val address: String = "",
     val averageRating: Double = 0.0,
     val reviews: List<Review> = listOf(),
-)
-
-data class Review(
-    val rating: Int,
-    val userId: String,
-    val dateOfReview: Long
 )
 
 data class Transaction(

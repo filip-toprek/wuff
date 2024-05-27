@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.ui.theme.Opensans
@@ -125,7 +127,8 @@ fun RegisterScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = colorResource(R.color.gray)
             ),
             supportingText = {
                 if (errorText == "BAD_NAME") {
@@ -153,7 +156,8 @@ fun RegisterScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = colorResource(R.color.gray)
             ),
             supportingText = {
                 if (errorText == "BAD_EMAIL") {
@@ -182,7 +186,8 @@ fun RegisterScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = colorResource(R.color.gray)
             ),
             supportingText = {
                 if (errorText == "BAD_PASSWORD") {
@@ -211,7 +216,8 @@ fun RegisterScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = colorResource(R.color.gray)
             ),
             supportingText = {
                 if (errorText == "NO_MATCH") {

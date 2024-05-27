@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,8 @@ import com.filiptoprek.wuff.domain.model.Reload
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
+import com.filiptoprek.wuff.presentation.profile.userProfile
+import com.filiptoprek.wuff.presentation.profile.userProfileScreen
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.ui.theme.Opensans
@@ -74,8 +77,10 @@ fun HomeScreen(
 
     var isReloading by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+    var isViewingProfile by remember { mutableStateOf(false) }
     var reserved by remember { mutableStateOf(false) }
     val selectedWalker = remember { mutableStateOf(UserProfile()) }
+    val selectedProfile = remember { mutableStateOf(UserProfile()) }
 
     var selectedText = remember { mutableStateOf("Odaberite vrstu šetnje") }
 
@@ -144,6 +149,10 @@ fun HomeScreen(
             }
             reloadWallet(reloadViewModel, onReload)
         }
+        else if (isViewingProfile)
+        {
+            userProfileScreen(selectedProfile.value)
+        }
         else{
             Column(
                 modifier = Modifier.padding(horizontal = 40.dp)
@@ -196,7 +205,7 @@ fun HomeScreen(
                     infoCard("Jednostavno i brzno nadopuni svoj novčanik", "Nadopuni", onReload)
 
                     Column(
-                        modifier = Modifier.padding(horizontal = 40.dp)
+                        modifier = Modifier
                     ) {
                         Row (
                             modifier = Modifier
@@ -220,7 +229,13 @@ fun HomeScreen(
                             val onReserve: (Boolean) -> Unit = { newValue ->
                                 reserved = newValue
                             }
-                            walkerTab(walkerList.value, onReserve, selectedWalker)
+                            val onViewUserProfile: (Boolean) -> Unit = { newValue ->
+                                isViewingProfile = newValue
+                            }
+                            val onSelectUserProfile: (UserProfile) -> Unit = { newValue ->
+                                selectedProfile.value = newValue
+                            }
+                            walkerTab(walkerList.value, onReserve, selectedWalker, onViewUserProfile, onSelectUserProfile)
                         }
                     }
                 }
@@ -292,7 +307,7 @@ fun infoCard(text: String, buttonText: String, onReload: (Boolean) -> Unit)
 
 
 @Composable
-fun walkerTab(walkerList: List<UserProfile?>, onReserve: (Boolean) -> Unit, selectedWalker : MutableState<UserProfile>)
+fun walkerTab(walkerList: List<UserProfile?>, onReserve: (Boolean) -> Unit, selectedWalker : MutableState<UserProfile>, onViewUserProfile: (Boolean) -> Unit, onSelectUserProfile: (UserProfile) -> Unit)
 {
     walkerList.forEach{walker ->
         Row (
@@ -306,7 +321,11 @@ fun walkerTab(walkerList: List<UserProfile?>, onReserve: (Boolean) -> Unit, sele
             AsyncImage(
                 modifier = Modifier
                     .clip(RoundedCornerShape(90.dp))
-                    .height(40.dp),
+                    .height(40.dp)
+                    .clickable {
+                        onViewUserProfile(true)
+                        onSelectUserProfile(walker!!)
+                    },
                 model = walker?.user?.profilePhotoUrl,
                 placeholder = painterResource(id = R.drawable.user_placeholder),
                 error = painterResource(id = R.drawable.user_placeholder),
@@ -746,7 +765,7 @@ fun walkerStats(profileViewModel: ProfileViewModel)
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth(0.4f),
-                text = "${profileViewModel.userProfile?.walker?.averageRating}/5",
+                text = "${profileViewModel.userProfile?.walker?.averageRating}/5.0",
                 color = colorResource(R.color.gray),
                 style = TextStyle(
                     fontFamily = Opensans,

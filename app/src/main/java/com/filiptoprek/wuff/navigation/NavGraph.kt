@@ -51,6 +51,7 @@ import com.filiptoprek.wuff.presentation.home.HomeScreen
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileScreen
+import com.filiptoprek.wuff.presentation.rating.RatingViewModel
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationsScreen
@@ -67,6 +68,7 @@ fun SetupNavGraph(
     homeViewModel: HomeViewModel,
     reservationViewModel: ReservationViewModel,
     reloadViewModel: ReloadViewModel,
+    ratingViewModel: RatingViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -198,7 +200,7 @@ fun SetupNavGraph(
             composable(
                 route = Routes.Reservations.route
             ) {
-                ReservationsScreen(navController, reservationViewModel, profileViewModel)
+                ReservationsScreen(navController, reservationViewModel, profileViewModel, ratingViewModel, viewModel)
                 BackHandler(true) {
                 }
             }

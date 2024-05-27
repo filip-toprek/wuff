@@ -91,6 +91,10 @@ class ReservationRepositoryImpl @Inject constructor(
             firebaseFirestore.collection("reservations").document(reservation.reservationId)
                 .update("completed", true).await()
 
+            val user = firebaseFirestore.collection("users").document(reservation.userId).get().await().toObject(UserProfile::class.java)!!
+            firebaseFirestore.collection("users").document(reservation.userId).update("pendingBalance", user.pendingBalance.minus(reservation.price)).await()
+
+
             transferCoins(reservation)
             Resource.Success(Unit)
         } catch (e: Exception) {

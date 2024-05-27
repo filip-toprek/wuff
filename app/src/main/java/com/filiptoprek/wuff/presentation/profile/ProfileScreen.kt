@@ -173,7 +173,7 @@ fun userProfile(
                     if(profileViewModel?.userProfile?.walker != null)
                     {
                         Text(
-                            text = profileViewModel.userProfile?.walker?.averageRating.toString() + "/5",
+                            text = profileViewModel.userProfile?.walker?.averageRating.toString() + "/5.0",
                             style = TextStyle(
                                 fontFamily = Opensans,
                                 fontSize = 12.sp,
@@ -188,7 +188,7 @@ fun userProfile(
                 }
 
                 if (!isEditing && !isApplying) {
-                    profileData(profileViewModel)
+                    profileData(profileViewModel?.userProfile!!)
 
                     Button(modifier = Modifier
                         .fillMaxWidth()
@@ -347,7 +347,7 @@ fun userProfile(
 }
 
 @Composable
-fun profileData(profileViewModel: ProfileViewModel?)
+fun profileData(user: UserProfile, isProfile: Boolean = true)
 {
 
     Row(
@@ -360,30 +360,33 @@ fun profileData(profileViewModel: ProfileViewModel?)
             .height(IntrinsicSize.Min)
     ) {
         Column {
-            Text(
-                text = "Saldo",
-                color = colorResource(R.color.gray),
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.White
+            if(isProfile)
+            {
+                Text(
+                    text = "Saldo",
+                    color = colorResource(R.color.gray),
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
                 )
-            )
-            Text(
-                modifier = Modifier.align(Alignment.End),
-                text = profileViewModel?.userProfile?.balance.toString(),
-                color = colorResource(R.color.gray),
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center,
-                    color = Color.White
+                Text(
+                    modifier = Modifier.align(Alignment.End),
+                    text = user.balance.toString(),
+                    color = colorResource(R.color.gray),
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
                 )
-            )
-            Spacer(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.size(20.dp))
+            }
             Text(
                 text = "Broj šetnji",
                 color = colorResource(R.color.gray),
@@ -397,7 +400,7 @@ fun profileData(profileViewModel: ProfileViewModel?)
             )
             Text(
                 modifier = Modifier.align(Alignment.End),
-                text = profileViewModel?.userProfile?.numOfWalks.toString(),
+                text = user.numOfWalks.toString(),
                 color = colorResource(R.color.gray),
                 style = TextStyle(
                     fontFamily = Opensans,
@@ -432,7 +435,7 @@ fun profileData(profileViewModel: ProfileViewModel?)
                 modifier = Modifier
                     .align(Alignment.Start)
                     .fillMaxWidth(0.4f),
-                text = profileViewModel?.userProfile?.aboutUser.toString(),
+                text = user.aboutUser.toString(),
                 color = colorResource(R.color.gray),
                 style = TextStyle(
                     fontFamily = Opensans,

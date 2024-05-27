@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -151,7 +152,8 @@ fun LoginScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor =  Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent),
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = colorResource(R.color.gray)),
             supportingText = {
                 if (errorText == "BAD_EMAIL") {
                     Text(
@@ -179,7 +181,8 @@ fun LoginScreen(
                 cursorColor = Color(parseColor("#52B788")),
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor =  Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent),
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedTextColor = colorResource(R.color.gray)),
             supportingText = {
                 if (errorText == "BAD_PASSWORD") {
                     Text(

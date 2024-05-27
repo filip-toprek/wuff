@@ -8,6 +8,7 @@ import com.filiptoprek.wuff.navigation.SetupNavGraph
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
+import com.filiptoprek.wuff.presentation.rating.RatingViewModel
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.ui.theme.WuffTheme
@@ -22,6 +23,7 @@ class MainActivity : ComponentActivity() {
     private val homeViewModel by viewModels<HomeViewModel>()
     private val reservationViewModel by viewModels<ReservationViewModel>()
     private val reloadViewModel by viewModels<ReloadViewModel>()
+    private val ratingViewModel by viewModels<RatingViewModel>()
 
     @Inject
     lateinit var googleSignInClient: GoogleSignInClient
@@ -30,7 +32,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             WuffTheme {
-                SetupNavGraph(viewModel = authViewModel, profileViewModel = profileViewModel, homeViewModel = homeViewModel, reservationViewModel = reservationViewModel, reloadViewModel = reloadViewModel, googleSignInClient = googleSignInClient)
+                SetupNavGraph(viewModel = authViewModel, profileViewModel = profileViewModel, homeViewModel = homeViewModel, reservationViewModel = reservationViewModel, reloadViewModel = reloadViewModel, ratingViewModel = ratingViewModel, googleSignInClient = googleSignInClient)
             }
         }
     }

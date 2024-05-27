@@ -17,5 +17,6 @@ data class Reservation (
     val price: Double = 0.0,
     val walkType: WalkType = WalkType(),
     var walker: UserProfile? = null,
-    var user: UserProfile? = null
+    var user: UserProfile? = null,
+    var rated: Boolean = false,
 )
