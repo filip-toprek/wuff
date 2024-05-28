@@ -202,10 +202,12 @@ fun LoginScreen(
                 }
                 Resource.Loading -> {
                     isLoading = true
-                    CircularProgressIndicator(modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                        .wrapContentHeight(Alignment.CenterVertically)
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        color = colorResource(R.color.green_accent)
                     )
                 }
                 is Resource.Success -> {

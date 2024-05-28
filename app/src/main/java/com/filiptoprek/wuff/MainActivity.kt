@@ -11,6 +11,7 @@ import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.rating.RatingViewModel
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
+import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.ui.theme.WuffTheme
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,16 +25,27 @@ class MainActivity : ComponentActivity() {
     private val reservationViewModel by viewModels<ReservationViewModel>()
     private val reloadViewModel by viewModels<ReloadViewModel>()
     private val ratingViewModel by viewModels<RatingViewModel>()
-
+    private val sharedViewModel by viewModels<SharedViewModel>()
     @Inject
     lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            WuffTheme {
-                SetupNavGraph(viewModel = authViewModel, profileViewModel = profileViewModel, homeViewModel = homeViewModel, reservationViewModel = reservationViewModel, reloadViewModel = reloadViewModel, ratingViewModel = ratingViewModel, googleSignInClient = googleSignInClient)
+            WuffTheme(authViewModel = authViewModel,
+                content = {
+                SetupNavGraph(
+                    viewModel = authViewModel,
+                    profileViewModel = profileViewModel,
+                    homeViewModel = homeViewModel,
+                    reservationViewModel = reservationViewModel,
+                    reloadViewModel = reloadViewModel,
+                    ratingViewModel = ratingViewModel,
+                    sharedViewModel = sharedViewModel,
+                    googleSignInClient = googleSignInClient
+                )
             }
+            )
         }
     }
 }

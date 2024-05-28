@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -27,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,14 +55,23 @@ import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.Reload
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
+import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.userProfile
 import com.filiptoprek.wuff.presentation.profile.userProfileScreen
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
+import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.firebase.Timestamp
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import kotlinx.coroutines.delay
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -68,19 +80,18 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     reservationViewModel: ReservationViewModel,
     profileViewModel: ProfileViewModel,
-    reloadViewModel: ReloadViewModel
+    reloadViewModel: ReloadViewModel,
+    sharedViewModel: SharedViewModel
     ){
     val homeFlow = homeViewModel.homeFlow.collectAsState()
     val reservationCreateFlow = reservationViewModel.reservationCreateFlow.collectAsState()
     val walkerList = homeViewModel.walkerList.collectAsState()
-    val walkTypeList = reservationViewModel.walkTypeList.collectAsState()
 
     var isReloading by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var isViewingProfile by remember { mutableStateOf(false) }
     var reserved by remember { mutableStateOf(false) }
     val selectedWalker = remember { mutableStateOf(UserProfile()) }
-    val selectedProfile = remember { mutableStateOf(UserProfile()) }
 
     var selectedText = remember { mutableStateOf("Odaberite vrstu šetnje") }
 
@@ -136,10 +147,7 @@ fun HomeScreen(
                         )
                     }
                     is Resource.Success -> {
-                        val onReserve: (Boolean) -> Unit = { newValue ->
-                            reserved = newValue
-                        }
-                        reserveWalk(selectedWalker.value, selectedText, walkTypeList.value, reservationViewModel, reservationCreateFlow, onReserve)
+                        navController.navigate(Routes.resereveWalk.route)
                     }
                 }
             }
@@ -148,10 +156,6 @@ fun HomeScreen(
                 isReloading = newValue
             }
             reloadWallet(reloadViewModel, onReload)
-        }
-        else if (isViewingProfile)
-        {
-            userProfileScreen(selectedProfile.value)
         }
         else{
             Column(
@@ -203,7 +207,7 @@ fun HomeScreen(
                         isReloading = newValue
                     }
                     infoCard("Jednostavno i brzno nadopuni svoj novčanik", "Nadopuni", onReload)
-
+                    Spacer(modifier = Modifier.size(20.dp))
                     Column(
                         modifier = Modifier
                     ) {
@@ -212,9 +216,16 @@ fun HomeScreen(
                                 .fillMaxWidth()
 
                         ){
-                            Text(text = "Šetači", color = Color.Black)
+                            Text(
+                                text = "Šetači",
+                                style = TextStyle(
+                                fontFamily = Opensans,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                color = colorResource(R.color.gray))
+                            )
                             Spacer(Modifier.weight(1f))
-                            Text(text = "Ostali>", color = Color.Black)
                         }
                         if(isLoading)
                         {
@@ -226,16 +237,7 @@ fun HomeScreen(
                                 color = colorResource(R.color.green_accent)
                             )
                         }else {
-                            val onReserve: (Boolean) -> Unit = { newValue ->
-                                reserved = newValue
-                            }
-                            val onViewUserProfile: (Boolean) -> Unit = { newValue ->
-                                isViewingProfile = newValue
-                            }
-                            val onSelectUserProfile: (UserProfile) -> Unit = { newValue ->
-                                selectedProfile.value = newValue
-                            }
-                            walkerTab(walkerList.value, onReserve, selectedWalker, onViewUserProfile, onSelectUserProfile)
+                            walkerTab(walkerList.value, homeViewModel, navController, sharedViewModel)
                         }
                     }
                 }
@@ -249,9 +251,9 @@ fun infoCard(text: String, buttonText: String, onReload: (Boolean) -> Unit)
 {
     Row(
         modifier = Modifier
+            .width(IntrinsicSize.Max)
             .fillMaxWidth()
             .wrapContentWidth()
-            .padding(15.dp)
             .background(colorResource(R.color.background_dark), RoundedCornerShape(8.dp))
             .padding(15.dp),
 
@@ -307,64 +309,84 @@ fun infoCard(text: String, buttonText: String, onReload: (Boolean) -> Unit)
 
 
 @Composable
-fun walkerTab(walkerList: List<UserProfile?>, onReserve: (Boolean) -> Unit, selectedWalker : MutableState<UserProfile>, onViewUserProfile: (Boolean) -> Unit, onSelectUserProfile: (UserProfile) -> Unit)
+fun walkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navController: NavHostController, sharedViewModel: SharedViewModel)
 {
-    walkerList.forEach{walker ->
-        Row (
-            modifier = Modifier
-                .padding(top = 15.dp)
-                .wrapContentWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
+    var refreshing by remember { mutableStateOf(false) }
 
-            ){
-            AsyncImage(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(90.dp))
-                    .height(40.dp)
-                    .clickable {
-                        onViewUserProfile(true)
-                        onSelectUserProfile(walker!!)
-                    },
-                model = walker?.user?.profilePhotoUrl,
-                placeholder = painterResource(id = R.drawable.user_placeholder),
-                error = painterResource(id = R.drawable.user_placeholder),
-                contentDescription = "User image",
-            )
-            Spacer(modifier = Modifier.size(35.dp))
-            Text(
-                text = walker?.user?.name.toString(),
-                color = colorResource(R.color.gray),
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                ))
-            Spacer(modifier = Modifier.weight(1f))
-            Button(modifier = Modifier.size(width = 115.dp, height = 40.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.green_accent)
-                ),
-                contentPadding = PaddingValues(0.dp),
-                onClick = {
-                    onReserve(true)
-                    selectedWalker.value = walker!!
-                })
-            {
-                Text(
-                    modifier = Modifier,
-                    text = "Rezerviraj",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
+    LaunchedEffect(refreshing) {
+        if (refreshing) {
+            homeViewModel.refresh()
+            delay(2000)
+            refreshing = false
+        }
+    }
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = refreshing),
+        onRefresh = { refreshing = true },
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            items(walkerList) { walker ->
+                Row(
+                    modifier = Modifier
+                        .padding(top = 15.dp)
+                        .wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+
+                    ) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(90.dp))
+                            .height(40.dp)
+                            .clickable {
+                                sharedViewModel.userProfile = walker
+                                navController.navigate(Routes.userProfile.route)
+                            },
+                        model = walker?.user?.profilePhotoUrl,
+                        placeholder = painterResource(id = R.drawable.user_placeholder),
+                        error = painterResource(id = R.drawable.user_placeholder),
+                        contentDescription = "User image",
                     )
-                )
+                    Spacer(modifier = Modifier.size(35.dp))
+                    Text(
+                        text = walker?.user?.name.toString(),
+                        color = colorResource(R.color.gray),
+                        style = TextStyle(
+                            fontFamily = Opensans,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.White
+                        )
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(modifier = Modifier.size(width = 115.dp, height = 40.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(R.color.green_accent)
+                        ),
+                        contentPadding = PaddingValues(0.dp),
+                        onClick = {
+                            sharedViewModel.selectedWalker = walker!!
+                            navController.navigate(Routes.resereveWalk.route)
+                        })
+                    {
+                        Text(
+                            modifier = Modifier,
+                            text = "Rezerviraj",
+                            style = TextStyle(
+                                fontFamily = Opensans,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                color = Color.White
+                            )
+                        )
+                    }
+                }
             }
         }
     }

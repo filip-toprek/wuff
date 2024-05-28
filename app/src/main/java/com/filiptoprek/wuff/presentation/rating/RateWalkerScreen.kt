@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.presentation.reservation
+package com.filiptoprek.wuff.presentation.rating
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -31,29 +31,23 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import arrow.core.left
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
-import com.filiptoprek.wuff.domain.model.profile.Walker
 import com.filiptoprek.wuff.domain.model.rating.Review
-import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
-import com.filiptoprek.wuff.domain.repository.rating.RatingRepository
+import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
-import com.filiptoprek.wuff.presentation.rating.RatingViewModel
+import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.ui.theme.Opensans
-import com.google.firebase.Timestamp
-import java.text.DateFormat
 import java.time.LocalDate
-import java.util.Date
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview
 @Composable
-fun rateWalker(ratingViewModel: RatingViewModel, authViewModel: AuthViewModel, walker: UserProfile ,walkId: String, onRate: (Boolean) -> Unit)
+fun RateWalkerScreen(navController: NavHostController, ratingViewModel: RatingViewModel, authViewModel: AuthViewModel, reservation: Reservation, reservationViewModel: ReservationViewModel)
 {
     var rating by remember {
         mutableStateOf(3)
@@ -110,7 +104,8 @@ fun rateWalker(ratingViewModel: RatingViewModel, authViewModel: AuthViewModel, w
                     )
                 }
                 is Resource.Success -> {
-                    onRate(false)
+                    navController.popBackStack()
+                    reservationViewModel.refreshReservations()
                 }
             }
         }
@@ -124,7 +119,7 @@ fun rateWalker(ratingViewModel: RatingViewModel, authViewModel: AuthViewModel, w
                 containerColor = colorResource(R.color.green_accent)
             ),
             onClick = {
-                ratingViewModel.addReview(Review(rating, authViewModel.currentUser?.uid.toString(), "${LocalDate.now().dayOfMonth}/${LocalDate.now().monthValue}/${LocalDate.now().year}", walkId, walker.user.uid))
+                ratingViewModel.addReview(Review(rating, authViewModel.currentUser?.uid.toString(), "${LocalDate.now().dayOfMonth}/${LocalDate.now().monthValue}/${LocalDate.now().year}", reservation.reservationId, reservation.walkerUserId))
             })
         {
             Text(

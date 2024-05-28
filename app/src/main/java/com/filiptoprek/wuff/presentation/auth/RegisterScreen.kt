@@ -241,7 +241,8 @@ fun RegisterScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .wrapContentWidth(Alignment.CenterHorizontally)
-                            .wrapContentHeight(Alignment.CenterVertically)
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        color = colorResource(R.color.green_accent)
                     )
                 }
 

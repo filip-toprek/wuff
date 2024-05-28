@@ -79,13 +79,12 @@ class ReservationViewModel @Inject constructor(
                 }else
                 {
                     getReservationsList()
-                    _reservationCreateFlow.value = Resource.Success(reservation)
-                    _reservationCreateFlow.value = null
+                    _reservationCreateFlow.value = result
                 }
             }
         }else
         {
-            _reservationFlow.value = Resource.Failure(Exception("Molimo unesite sva polja"))
+            _reservationCreateFlow.value = Resource.Failure(Exception("Molimo unesite sva polja"))
         }
     }
 

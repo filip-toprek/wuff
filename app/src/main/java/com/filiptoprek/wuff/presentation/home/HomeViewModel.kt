@@ -30,6 +30,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun refresh(){
+        _homeFlow.value = null
+        getWalkers()
+    }
+
     private fun getWalkers() {
         viewModelScope.launch {
             _homeFlow.value = Resource.Loading

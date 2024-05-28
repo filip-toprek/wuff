@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.presentation.reservation
+package com.filiptoprek.wuff.presentation.rating
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row

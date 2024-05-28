@@ -1,10 +1,5 @@
 package com.filiptoprek.wuff.presentation.auth
 
-data class LoginResult (
-    val data: UserData?,
-    val errorMessage: String?
-)
-
 data class UserData(
     val userId: String,
     val username: String?,

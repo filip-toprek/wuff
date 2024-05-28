@@ -47,16 +47,24 @@ import com.filiptoprek.wuff.presentation.auth.LoginScreen
 import com.filiptoprek.wuff.presentation.auth.LandingScreen
 import com.filiptoprek.wuff.presentation.auth.RegisterScreen
 import com.filiptoprek.wuff.domain.model.core.BottomNavigationItem
+import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.presentation.home.HomeScreen
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileScreen
+import com.filiptoprek.wuff.presentation.profile.userProfileScreen
+import com.filiptoprek.wuff.presentation.rating.RateWalkerScreen
 import com.filiptoprek.wuff.presentation.rating.RatingViewModel
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
+import com.filiptoprek.wuff.presentation.reservation.ReservationDetailsScreen
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationsScreen
+import com.filiptoprek.wuff.presentation.reservation.ReserveWalkScreen
+import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseUser
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +77,7 @@ fun SetupNavGraph(
     reservationViewModel: ReservationViewModel,
     reloadViewModel: ReloadViewModel,
     ratingViewModel: RatingViewModel,
+    sharedViewModel: SharedViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -105,12 +114,15 @@ fun SetupNavGraph(
         bottomBar = {
             if (currentUser != null) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     NavigationBar(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(50.dp, 50.dp, 50.dp, 50.dp)).width(200.dp),
+                            .clip(RoundedCornerShape(50.dp, 50.dp, 50.dp, 50.dp))
+                            .width(200.dp),
                         containerColor = colorResource(R.color.gray),
                         contentColor = colorResource(R.color.green_accent),
                     ) {
@@ -186,9 +198,9 @@ fun SetupNavGraph(
             composable(
                 route = Routes.Home.route
             ) {
+                HomeScreen(navController, homeViewModel, reservationViewModel, profileViewModel, reloadViewModel, sharedViewModel)
                 BackHandler(true) {
                 }
-                HomeScreen(navController, homeViewModel, reservationViewModel, profileViewModel, reloadViewModel)
             }
             composable(
                 route = Routes.Profile.route
@@ -200,9 +212,29 @@ fun SetupNavGraph(
             composable(
                 route = Routes.Reservations.route
             ) {
-                ReservationsScreen(navController, reservationViewModel, profileViewModel, ratingViewModel, viewModel)
+                ReservationsScreen(navController, reservationViewModel, profileViewModel, sharedViewModel)
                 BackHandler(true) {
                 }
+            }
+            composable(
+                route = Routes.userProfile.route
+            ){
+                userProfileScreen(sharedViewModel.userProfile!!)
+            }
+            composable(
+                route = Routes.reservationDetails.route
+            ){
+                ReservationDetailsScreen(sharedViewModel.selectedReservation!!, reservationViewModel, navController, viewModel, sharedViewModel)
+            }
+            composable(
+                route = Routes.rateWalker.route
+            ){
+                RateWalkerScreen(navController, ratingViewModel, viewModel, sharedViewModel.reservationToRate!!, reservationViewModel)
+            }
+            composable(
+                route = Routes.resereveWalk.route
+            ){
+                ReserveWalkScreen(reservationViewModel, sharedViewModel, navController)
             }
         }
     }
