@@ -62,6 +62,8 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +74,28 @@ fun ProfileScreen(
 ){
     viewModel?.let { authViewModel ->
         profileViewModel?.let { profileVM ->
-            userProfile(navController, authViewModel, profileVM)
+            var refreshing by remember { mutableStateOf(false) }
+
+            LaunchedEffect(refreshing) {
+                if (refreshing) {
+                    profileVM.refreshUser()
+                    delay(2000)
+                    refreshing = false
+                }
+            }
+
+            SwipeRefresh(
+                state = rememberSwipeRefreshState(isRefreshing = refreshing),
+                onRefresh = { refreshing = true },
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    item {
+                        userProfile(navController, authViewModel, profileVM)
+                    }
+                }
+            }
         }
     }
 }
@@ -124,7 +147,7 @@ fun userProfile(
                 )
             )
         }
-        Spacer(modifier = Modifier.size(100.dp))
+        Spacer(modifier = Modifier.size(40.dp))
         if(isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier

@@ -8,6 +8,8 @@ import com.filiptoprek.wuff.domain.model.rating.Review
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.repository.rating.RatingRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.UUID
 import javax.inject.Inject
 
@@ -30,7 +32,7 @@ class RatingRepositoryImpl  @Inject constructor(
         return try {
             firebaseFirestore.collection("users").document(review.walkerId).update("walker.reviews", reviewList.plus(review)).await()
             val ratingList: List<Int> = reviewList.plus(review).map { it.rating }
-            firebaseFirestore.collection("users").document(review.walkerId).update("walker.averageRating", ratingList.average()).await()
+            firebaseFirestore.collection("users").document(review.walkerId).update("walker.averageRating", BigDecimal(ratingList.average()).setScale(2, RoundingMode.HALF_EVEN).toDouble()).await()
             firebaseFirestore.collection("reservations").document(review.walkId).update("rated", true).await()
             Resource.Success(Unit)
         } catch (e: Exception) {

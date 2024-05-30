@@ -3,7 +3,6 @@ package com.filiptoprek.wuff.presentation.reservation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,10 +25,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -158,6 +158,7 @@ fun reservationCard(
     profileViewModel: ProfileViewModel
 )
 {
+    var hideCompleted by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
     if(reservationList.isEmpty())
     {
@@ -181,7 +182,37 @@ fun reservationCard(
                 color = colorResource(R.color.gray)
             )
         }
+    }else
+    {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Sakrij završene šetnje",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 12.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Start,
+                ),
+                color = colorResource(R.color.gray)
+            )
+            Spacer(modifier = Modifier.size(5.dp))
+            RadioButton(
+                modifier = Modifier.size(25.dp),
+                selected = hideCompleted,
+                onClick = { hideCompleted = !hideCompleted},
+                colors = RadioButtonColors(
+                    selectedColor = colorResource(R.color.green_accent),
+                    disabledUnselectedColor = colorResource(R.color.background_dark),
+                    unselectedColor = colorResource(R.color.gray),
+                    disabledSelectedColor = colorResource(R.color.gray)
+                )
+            )
+        }
     }
+
 
     LaunchedEffect(refreshing) {
         if (refreshing) {
@@ -204,6 +235,11 @@ fun reservationCard(
             modifier = Modifier.fillMaxHeight()
         ) {
             items(sortedReservationList) { reservation ->
+                if(hideCompleted && (reservation?.completed!! || reservation?.declined!!))
+                {
+                    return@items
+                }
+
                     Row(
                         modifier = Modifier
                             .padding(top = 15.dp)
@@ -217,8 +253,9 @@ fun reservationCard(
                                 .clip(RoundedCornerShape(90.dp))
                                 .height(40.dp)
                                 .clickable {
-                                    sharedViewModel.userProfile = if(profileViewModel.userProfile?.user?.uid == reservation?.walkerUserId) reservation?.user!! else reservation?.walker!!
-                                    navController.navigate(Routes.userProfile.route)
+                                    sharedViewModel.userProfile =
+                                        if (profileViewModel.userProfile?.user?.uid == reservation?.walkerUserId) reservation?.user!! else reservation?.walker!!
+                                    navController.navigate(Routes.UserProfile.route)
                                 },
                             model = if (profileViewModel.userProfile?.user?.uid == reservation?.walkerUserId) {
                                 reservation?.user?.user?.profilePhotoUrl
@@ -274,7 +311,7 @@ fun reservationCard(
                             contentPadding = PaddingValues(0.dp),
                             onClick = {
                                 sharedViewModel.selectedReservation = reservation
-                                navController.navigate(Routes.reservationDetails.route)
+                                navController.navigate(Routes.ReservationDetails.route)
                             })
                         {
                             Text(
@@ -294,8 +331,6 @@ fun reservationCard(
             }
         }
     }
-
-
 
 
 @Composable

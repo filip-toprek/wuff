@@ -630,7 +630,10 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
                         val year = currentTime.get(Calendar.YEAR)
                         val month = currentTime.get(Calendar.MONTH) + 1 // Months are zero-based!!!!!!
                         val dayOfMonth = currentTime.get(Calendar.DAY_OF_MONTH)
-                        val currentDate = "$dayOfMonth/$month/$year"
+
+                        val formattedMonth = String.format("%02d", month)
+                        val formattedDay = String.format("%02d", dayOfMonth)
+                        val currentDate = "$formattedDay/$formattedMonth/$year"
 
                         if (((hours <= currentTime.time.hours) && dateString.value == currentDate)) {
                             timeString.value = ""

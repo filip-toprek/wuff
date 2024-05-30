@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -48,10 +49,12 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
+import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.home.dateTimePickers
 import com.filiptoprek.wuff.presentation.home.dropDownMenu
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.ui.theme.Opensans
+import com.filiptoprek.wuff.ui.theme.Pattaya
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,163 +77,177 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
 
     var isError by remember { mutableStateOf(false) }
     var errorText by remember { mutableStateOf("") }
-
-    Row(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentWidth()
-            .padding(15.dp)
-            .background(colorResource(R.color.box_bkg_white), RoundedCornerShape(8.dp))
-            .padding(15.dp)
-            .height(IntrinsicSize.Min)
+            .background(colorResource(R.color.background_white))
+            .fillMaxSize()
+            .wrapContentWidth(Alignment.CenterHorizontally)
+            .wrapContentHeight(Alignment.Top)
     ) {
-        Column(
-            modifier = Modifier
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .wrapContentHeight(Alignment.Top),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        Row {
             Text(
-                text = "Rezerviraj šetnju",
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 23.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-                color = colorResource(R.color.gray)
-
-            )
-            Spacer(modifier = Modifier.size(20.dp))
-            AsyncImage(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(90.dp))
-                    .border(
-                        1.dp,
-                        colorResource(R.color.gray),
-                        shape = RoundedCornerShape(90.dp)
-                    )
-                    .size(100.dp),
-                model = sharedViewModel.selectedWalker?.user?.profilePhotoUrl,
-                placeholder = painterResource(id = R.drawable.user_placeholder),
-                error = painterResource(id = R.drawable.user_placeholder),
-                contentDescription = "User image",
-            )
-            Spacer(modifier = Modifier.size(15.dp))
-            Text(
-                text = sharedViewModel.selectedWalker?.user?.name.toString(),
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .padding(top = 15.dp),
+                text = "Wuff!",
                 style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = colorResource(R.color.gray)
+                    fontFamily = Pattaya,
+                    fontSize = 50.sp,
+                    lineHeight = 27.sp,
+                    color = colorResource(R.color.green_accent)
                 )
             )
-            Spacer(modifier = Modifier.size(10.dp))
-            if (isError){
+        }
+
+        Spacer(modifier = Modifier.size(20.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth()
+                .padding(15.dp)
+                .background(colorResource(R.color.box_bkg_white), RoundedCornerShape(8.dp))
+                .padding(15.dp)
+                .height(IntrinsicSize.Min)
+        ) {
+            Column(
+                modifier = Modifier
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .wrapContentHeight(Alignment.Top),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 Text(
-                    text = errorText,
+                    text = "Rezerviraj šetnju",
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 23.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    ),
+                    color = colorResource(R.color.gray)
+
+                )
+                Spacer(modifier = Modifier.size(20.dp))
+                AsyncImage(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(90.dp))
+                        .border(
+                            1.dp,
+                            colorResource(R.color.gray),
+                            shape = RoundedCornerShape(90.dp)
+                        )
+                        .size(100.dp),
+                    model = sharedViewModel.selectedWalker?.user?.profilePhotoUrl,
+                    placeholder = painterResource(id = R.drawable.user_placeholder),
+                    error = painterResource(id = R.drawable.user_placeholder),
+                    contentDescription = "User image",
+                )
+                Spacer(modifier = Modifier.size(15.dp))
+                Text(
+                    text = sharedViewModel.selectedWalker?.user?.name.toString(),
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        color = colorResource(R.color.gray)
+                    )
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                if (isError){
+                    Text(
+                        text = errorText,
+                        style = TextStyle(
+                            fontFamily = Opensans,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.Red
+                        )
+                    )
+                }
+                dropDownMenu(selectedText, walkTypeList.value)
+
+                dateTimePickers(dateString, timeString)
+
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = if (selectedText.value != "Odaberite vrstu šetnje") {
+                        "${walkTypeList.value.find { it?.walkName == selectedText.value }?.walkPrice}€"
+                    } else {
+                        "Cijena nije dostupna"
+                    },
                     style = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-                        color = Color.Red
+                        color = Color.Gray
                     )
                 )
-            }
-            dropDownMenu(selectedText, walkTypeList.value)
+                Spacer(modifier = Modifier.size(10.dp))
 
-            dateTimePickers(dateString, timeString)
-
-            Spacer(modifier = Modifier.size(10.dp))
-            Text(
-                text = if (selectedText.value != "Odaberite vrstu šetnje") {
-                    "${walkTypeList.value.find { it?.walkName == selectedText.value }?.walkPrice}€"
-                } else {
-                    "Cijena nije dostupna"
-                },
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.Gray
-                )
-            )
-            Spacer(modifier = Modifier.size(10.dp))
-
-            reservationFlow.value?.let {
-                when(it){
-                    is Resource.Failure -> {
-                        isError = true
-                        errorText = it.exception.message.toString()
-                    }
-                    Resource.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                                .wrapContentHeight(Alignment.CenterVertically),
-                            color = colorResource(R.color.green_accent)
-                        )
-                    }
-                    is Resource.Success -> {
-                    }
-                }
-            }
-            Button(modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .wrapContentHeight(Alignment.CenterVertically)
-                .width(IntrinsicSize.Max),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.green_accent)
-                ),
-                onClick = {
-                    isError = false
-                    if(selectedText.value == "Odaberite vrstu šetnje")
-                    {
-                        isError = true
-                        errorText = "Molimo odaberite vrstu šetnje"
-                        return@Button
-                    }
-
-                    reservationViewModel.createReservation(
-                        Reservation("", sharedViewModel.selectedWalker?.user?.uid.toString(),"", dateString.value
-                            , timeString.value,false,false, false, false, walkTypeList.value.find { it?.walkName == selectedText.value }?.walkPrice!!,
-                            walkType = walkTypeList.value.find { type -> type?.walkName == selectedText.value }!!
-                        )
-                    )
-
-                    reservationFlow.value?.let {
-                        when(it){
-                            is Resource.Failure -> {
-                            }
-                            Resource.Loading -> {
-                            }
-                            is Resource.Success -> {
-                                navController.popBackStack()
-                            }
+                reservationFlow.value?.let {
+                    when(it){
+                        is Resource.Failure -> {
+                            isError = true
+                            errorText = it.exception.message.toString()
+                        }
+                        Resource.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
+                                    .wrapContentHeight(Alignment.CenterVertically),
+                                color = colorResource(R.color.green_accent)
+                            )
+                        }
+                        is Resource.Success -> {
+                            navController.popBackStack()
+                            navController.navigate(Routes.Home.route)
                         }
                     }
-                })
-            {
-                Text(
-                    modifier = Modifier,
-                    text = "Rezerviraj",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
+                }
+                Button(modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .width(IntrinsicSize.Max),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.green_accent)
+                    ),
+                    onClick = {
+                        isError = false
+                        if(selectedText.value == "Odaberite vrstu šetnje")
+                        {
+                            isError = true
+                            errorText = "Molimo odaberite vrstu šetnje"
+                            return@Button
+                        }
+
+                        reservationViewModel.createReservation(
+                            Reservation("", sharedViewModel.selectedWalker?.user?.uid.toString(),"", dateString.value
+                                , timeString.value,false,false, false, false, walkTypeList.value.find { it?.walkName == selectedText.value }?.walkPrice!!,
+                                walkType = walkTypeList.value.find { type -> type?.walkName == selectedText.value }!!
+                            )
+                        )
+                    })
+                {
+                    Text(
+                        modifier = Modifier,
+                        text = "Rezerviraj",
+                        style = TextStyle(
+                            fontFamily = Opensans,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.White
+                        )
                     )
-                )
+                }
             }
         }
     }

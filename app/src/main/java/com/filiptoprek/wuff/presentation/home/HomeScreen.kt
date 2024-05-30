@@ -19,18 +19,13 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,20 +40,17 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.filiptoprek.wuff.R
-import com.filiptoprek.wuff.domain.model.Reload
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.userProfile
-import com.filiptoprek.wuff.presentation.profile.userProfileScreen
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
@@ -66,12 +58,7 @@ import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.google.firebase.Timestamp
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import kotlinx.coroutines.delay
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -84,16 +71,10 @@ fun HomeScreen(
     sharedViewModel: SharedViewModel
     ){
     val homeFlow = homeViewModel.homeFlow.collectAsState()
-    val reservationCreateFlow = reservationViewModel.reservationCreateFlow.collectAsState()
     val walkerList = homeViewModel.walkerList.collectAsState()
 
-    var isReloading by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var isViewingProfile by remember { mutableStateOf(false) }
     var reserved by remember { mutableStateOf(false) }
-    val selectedWalker = remember { mutableStateOf(UserProfile()) }
-
-    var selectedText = remember { mutableStateOf("Odaberite vrstu šetnje") }
 
     homeFlow.value?.let {
         when(it){
@@ -147,17 +128,11 @@ fun HomeScreen(
                         )
                     }
                     is Resource.Success -> {
-                        navController.navigate(Routes.resereveWalk.route)
+                        navController.navigate(Routes.ResereveWalk.route)
                     }
                 }
             }
-        }else if(isReloading){
-            val onReload: (Boolean) -> Unit = { newValue ->
-                isReloading = newValue
-            }
-            reloadWallet(reloadViewModel, onReload)
-        }
-        else{
+        }else{
             Column(
                 modifier = Modifier.padding(horizontal = 40.dp)
             ) {
@@ -203,10 +178,7 @@ fun HomeScreen(
 
                 }else
                 {
-                    val onReload: (Boolean) -> Unit = { newValue ->
-                        isReloading = newValue
-                    }
-                    infoCard("Jednostavno i brzno nadopuni svoj novčanik", "Nadopuni", onReload)
+                    infoCard("Jednostavno i brzno nadopuni svoj novčanik", "Nadopuni", navController)
                     Spacer(modifier = Modifier.size(20.dp))
                     Column(
                         modifier = Modifier
@@ -247,7 +219,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun infoCard(text: String, buttonText: String, onReload: (Boolean) -> Unit)
+fun infoCard(text: String, buttonText: String, navController: NavHostController)
 {
     Row(
         modifier = Modifier
@@ -277,7 +249,8 @@ fun infoCard(text: String, buttonText: String, onReload: (Boolean) -> Unit)
                     containerColor = colorResource(R.color.green_accent)
                 ),
                 onClick = {
-                    onReload(true)
+                    navController.navigate(Routes.Reload.route)
+
                 })
             {
                 Text(
@@ -343,7 +316,7 @@ fun walkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navC
                             .height(40.dp)
                             .clickable {
                                 sharedViewModel.userProfile = walker
-                                navController.navigate(Routes.userProfile.route)
+                                navController.navigate(Routes.UserProfile.route)
                             },
                         model = walker?.user?.profilePhotoUrl,
                         placeholder = painterResource(id = R.drawable.user_placeholder),
@@ -371,7 +344,7 @@ fun walkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navC
                         contentPadding = PaddingValues(0.dp),
                         onClick = {
                             sharedViewModel.selectedWalker = walker!!
-                            navController.navigate(Routes.resereveWalk.route)
+                            navController.navigate(Routes.ResereveWalk.route)
                         })
                     {
                         Text(
@@ -392,314 +365,6 @@ fun walkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navC
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun reloadWallet(reloadViewModel: ReloadViewModel, onReload: (Boolean) -> Unit)
-{
-    var reloadFlow = reloadViewModel.reloadFlow.collectAsState()
-    var ccNum by remember { mutableStateOf("") }
-    var reloadAmount by remember { mutableStateOf("") }
-    var cvvNum by remember { mutableStateOf("") }
-    var ccDate by remember { mutableStateOf("") }
-    var ccYear by remember { mutableStateOf("") }
-    var errorText by remember { mutableStateOf("") }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentWidth()
-            .padding(15.dp)
-            .background(colorResource(R.color.box_bkg_white), RoundedCornerShape(8.dp))
-            .padding(15.dp)
-            .height(IntrinsicSize.Min)
-    ) {
-        Column(
-            modifier = Modifier
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .wrapContentHeight(Alignment.Top),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "Nadopuni novčanik",
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 23.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-                color = colorResource(R.color.gray)
-
-            )
-            Spacer(modifier = Modifier.size(20.dp))
-            Text(
-                text = "Broj kratice",
-                color = colorResource(R.color.gray),
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-            )
-            Spacer(modifier = Modifier.size(5.dp))
-            TextField(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                value = ccNum,
-                textStyle = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start,
-                    color = colorResource(R.color.gray),
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                supportingText = {
-
-                },
-                onValueChange = {newValue ->
-                    if (newValue.all { it.isDigit() } && newValue.length <= 16) {
-                        ccNum = newValue
-                    }
-                },
-                shape = RoundedCornerShape(8.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    unfocusedTextColor = colorResource(R.color.gray),
-                    containerColor = Color.White,
-                    cursorColor = colorResource(R.color.green_accent),
-                    disabledLabelColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                )
-                Text(
-                    text = "Datum i godina isteka",
-                    color = colorResource(R.color.gray),
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                )
-                Spacer(modifier = Modifier.size(5.dp))
-                Row (
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ){
-                    TextField(
-                        modifier = Modifier.width(50.dp),
-                        value = ccDate,
-                        textStyle = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Start,
-                            color = colorResource(R.color.gray),
-                        ),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        supportingText = {
-
-                        },
-                        onValueChange = {newValue ->
-                            if (newValue.all { it.isDigit() } && newValue.length <= 2) {
-                                ccDate = newValue
-                            }
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            unfocusedTextColor = colorResource(R.color.gray),
-                            containerColor = Color.White,
-                            cursorColor = colorResource(R.color.green_accent),
-                            disabledLabelColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                    )
-                    Spacer(modifier = Modifier.size(20.dp))
-                    TextField(
-                        modifier = Modifier.width(50.dp),
-                        value = ccYear,
-                        textStyle = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Start,
-                            color = colorResource(R.color.gray),
-                        ),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        supportingText = {
-
-                        },
-                        onValueChange = {newValue ->
-                            if (newValue.all { it.isDigit() } && newValue.length <= 2) {
-                                ccYear = newValue
-                            }
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            unfocusedTextColor = colorResource(R.color.gray),
-                            containerColor = Color.White,
-                            cursorColor = colorResource(R.color.green_accent),
-                            disabledLabelColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                    )
-                }
-            Text(
-                text = "CVV",
-                color = colorResource(R.color.gray),
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-            )
-            TextField(
-                modifier = Modifier.width(50.dp),
-                value = cvvNum,
-                textStyle = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start,
-                    color = colorResource(R.color.gray),
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                supportingText = {
-
-                },
-                onValueChange = {newValue ->
-                    if (newValue.all { it.isDigit() } && newValue.length <= 3) {
-                        cvvNum = newValue
-                    }
-                },
-                shape = RoundedCornerShape(8.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    unfocusedTextColor = colorResource(R.color.gray),
-                    containerColor = Color.White,
-                    cursorColor = colorResource(R.color.green_accent),
-                    disabledLabelColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-            )
-            Spacer(modifier = Modifier.size(10.dp))
-            Text(
-                text = "Vrijednost nadoplate",
-                color = colorResource(R.color.gray),
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-            )
-            TextField(
-                modifier = Modifier.width(60.dp),
-                value = reloadAmount,
-                textStyle = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Start,
-                    color = colorResource(R.color.gray),
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                supportingText = {
-
-                },
-                onValueChange = {newValue ->
-                    if (newValue.all { it.isDigit() } && newValue.length <= 2) {
-                        reloadAmount = newValue
-                    }
-                },
-                shape = RoundedCornerShape(8.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    unfocusedTextColor = colorResource(R.color.gray),
-                    containerColor = Color.White,
-                    cursorColor = colorResource(R.color.green_accent),
-                    disabledLabelColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-            )
-            reloadFlow.value?.let {
-                when(it){
-                    is Resource.Failure -> {
-                        errorText = it.exception.message.toString()
-                    }
-                    Resource.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                                .wrapContentHeight(Alignment.CenterVertically),
-                            color = colorResource(R.color.green_accent)
-                        )
-                    }
-                    is Resource.Success -> {
-                    }
-                }
-            }
-            Text(
-                text = errorText,
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Color.Red
-                )
-            )
-            Button(modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .wrapContentHeight(Alignment.CenterVertically)
-                .width(IntrinsicSize.Max),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.green_accent)
-                ),
-                onClick = {
-                    errorText = ""
-                    reloadViewModel.reloadBalance(Reload(reloadAmount.toDouble()))
-                    onReload(false)
-                })
-            {
-                Text(
-                    modifier = Modifier,
-                    text = "Nadoplati",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                )
-            }
-
-        }
-    }
-}
 
 
 @Composable

@@ -20,6 +20,9 @@ import com.filiptoprek.wuff.domain.usecase.auth.ValidateEmailUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateNameUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidatePasswordUseCase
 import com.filiptoprek.wuff.domain.usecase.profile.ValidateAboutUserUseCase
+import com.filiptoprek.wuff.domain.usecase.reload.ValidateCVVUseCase
+import com.filiptoprek.wuff.domain.usecase.reload.ValidateCardDateUseCase
+import com.filiptoprek.wuff.domain.usecase.reload.ValidateReloadFormUseCase
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -90,6 +93,15 @@ object AppModule {
             validName = ValidateNameUseCase(),
             validEmail = ValidateEmailUseCase(),
             validPassword = ValidatePasswordUseCase(),
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideReloadFormValidatorUseCase(): ValidateReloadFormUseCase {
+        return ValidateReloadFormUseCase(
+            validDate = ValidateCardDateUseCase(),
+            validateCVV = ValidateCVVUseCase()
         )
     }
 

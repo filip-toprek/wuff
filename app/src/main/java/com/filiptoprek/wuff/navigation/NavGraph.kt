@@ -3,7 +3,6 @@ package com.filiptoprek.wuff.navigation
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,7 +46,6 @@ import com.filiptoprek.wuff.presentation.auth.LoginScreen
 import com.filiptoprek.wuff.presentation.auth.LandingScreen
 import com.filiptoprek.wuff.presentation.auth.RegisterScreen
 import com.filiptoprek.wuff.domain.model.core.BottomNavigationItem
-import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.presentation.home.HomeScreen
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
@@ -55,6 +53,7 @@ import com.filiptoprek.wuff.presentation.profile.ProfileScreen
 import com.filiptoprek.wuff.presentation.profile.userProfileScreen
 import com.filiptoprek.wuff.presentation.rating.RateWalkerScreen
 import com.filiptoprek.wuff.presentation.rating.RatingViewModel
+import com.filiptoprek.wuff.presentation.reload.ReloadScreen
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationDetailsScreen
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
@@ -63,8 +62,6 @@ import com.filiptoprek.wuff.presentation.reservation.ReserveWalkScreen
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseUser
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -217,24 +214,29 @@ fun SetupNavGraph(
                 }
             }
             composable(
-                route = Routes.userProfile.route
+                route = Routes.UserProfile.route
             ){
                 userProfileScreen(sharedViewModel.userProfile!!)
             }
             composable(
-                route = Routes.reservationDetails.route
+                route = Routes.ReservationDetails.route
             ){
                 ReservationDetailsScreen(sharedViewModel.selectedReservation!!, reservationViewModel, navController, viewModel, sharedViewModel)
             }
             composable(
-                route = Routes.rateWalker.route
+                route = Routes.RateWalker.route
             ){
                 RateWalkerScreen(navController, ratingViewModel, viewModel, sharedViewModel.reservationToRate!!, reservationViewModel)
             }
             composable(
-                route = Routes.resereveWalk.route
+                route = Routes.ResereveWalk.route
             ){
                 ReserveWalkScreen(reservationViewModel, sharedViewModel, navController)
+            }
+            composable(
+                route = Routes.Reload.route
+            ){
+                ReloadScreen(reloadViewModel, navController)
             }
         }
     }

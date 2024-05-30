@@ -17,11 +17,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -200,7 +195,7 @@ fun ReservationDetailsScreen(
                         if (!reservation.rated) {
                             ActionButton("Ocijenite šetnju", colorResource(R.color.green_accent)) {
                                 sharedViewModel.reservationToRate = reservation
-                                navController.navigate(Routes.rateWalker.route)
+                                navController.navigate(Routes.RateWalker.route)
                             }
                         }
                     }
