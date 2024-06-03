@@ -50,7 +50,6 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
-import com.filiptoprek.wuff.presentation.profile.userProfile
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel

@@ -1,14 +1,19 @@
 package com.filiptoprek.wuff.presentation.reservation
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.raise.result
 import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.domain.model.location.Location
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
+import com.filiptoprek.wuff.domain.model.profile.Walker
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.filiptoprek.wuff.domain.repository.home.HomeRepository
+import com.filiptoprek.wuff.domain.repository.location.LocationRepository
 import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
@@ -25,7 +30,8 @@ class ReservationViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val homeRepository: HomeRepository,
     private val validateReservationUseCase: ValidateReservationUseCase,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val locationRepository: LocationRepository
 ): ViewModel(){
 
     private val _reservationFlow = MutableStateFlow<Resource<Any>?>(null)

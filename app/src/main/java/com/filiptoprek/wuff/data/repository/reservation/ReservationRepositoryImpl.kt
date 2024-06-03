@@ -1,11 +1,13 @@
 package com.filiptoprek.wuff.data.repository.reservation
 
+import android.content.Intent
 import com.filiptoprek.wuff.data.utils.await
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
+import com.filiptoprek.wuff.service.LocationService
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import java.math.BigDecimal

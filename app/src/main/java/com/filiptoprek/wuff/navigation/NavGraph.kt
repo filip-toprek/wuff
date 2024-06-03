@@ -1,5 +1,6 @@
 package com.filiptoprek.wuff.navigation
 
+import android.content.Context
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -48,6 +49,8 @@ import com.filiptoprek.wuff.presentation.auth.RegisterScreen
 import com.filiptoprek.wuff.domain.model.core.BottomNavigationItem
 import com.filiptoprek.wuff.presentation.home.HomeScreen
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
+import com.filiptoprek.wuff.presentation.location.LocationScreen
+import com.filiptoprek.wuff.presentation.location.LocationViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileScreen
 import com.filiptoprek.wuff.presentation.profile.userProfileScreen
@@ -61,6 +64,7 @@ import com.filiptoprek.wuff.presentation.reservation.ReservationsScreen
 import com.filiptoprek.wuff.presentation.reservation.ReserveWalkScreen
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.maps.GoogleMap
 import com.google.firebase.auth.FirebaseUser
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -75,6 +79,7 @@ fun SetupNavGraph(
     reloadViewModel: ReloadViewModel,
     ratingViewModel: RatingViewModel,
     sharedViewModel: SharedViewModel,
+    locationViewModel: LocationViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -221,7 +226,7 @@ fun SetupNavGraph(
             composable(
                 route = Routes.ReservationDetails.route
             ){
-                ReservationDetailsScreen(sharedViewModel.selectedReservation!!, reservationViewModel, navController, viewModel, sharedViewModel)
+                ReservationDetailsScreen(sharedViewModel.selectedReservation!!, reservationViewModel, navController, viewModel, locationViewModel, sharedViewModel)
             }
             composable(
                 route = Routes.RateWalker.route
@@ -237,6 +242,11 @@ fun SetupNavGraph(
                 route = Routes.Reload.route
             ){
                 ReloadScreen(reloadViewModel, navController)
+            }
+            composable(
+                route = Routes.TrackLocation.route
+            ){
+                LocationScreen(navController, locationViewModel, sharedViewModel)
             }
         }
     }

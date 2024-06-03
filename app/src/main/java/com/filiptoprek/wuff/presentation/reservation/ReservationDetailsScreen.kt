@@ -1,5 +1,6 @@
 package com.filiptoprek.wuff.presentation.reservation
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -31,10 +33,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.filiptoprek.wuff.R
+import com.filiptoprek.wuff.data.repository.location.LocationClientImpl
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
+import com.filiptoprek.wuff.presentation.location.LocationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
+import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 
@@ -44,6 +49,7 @@ fun ReservationDetailsScreen(
     reservationViewModel: ReservationViewModel,
     navController: NavHostController,
     authViewModel: AuthViewModel,
+    locationViewModel: LocationViewModel,
     sharedViewModel: SharedViewModel
 )
 {
@@ -181,8 +187,17 @@ fun ReservationDetailsScreen(
                     reservation.declined && authViewModel.currentUser?.uid == reservation.userId ->
                         ReservationText("Rezervacija je odbijena", Color.Red)
 
-                    reservation.started && !reservation.completed && authViewModel.currentUser?.uid == reservation.userId ->
+                    reservation.started && !reservation.completed && authViewModel.currentUser?.uid == reservation.userId -> {
                         ReservationText("Šetnja u tijeku", colorResource(R.color.green_accent))
+                        if(authViewModel.currentUser?.uid != reservation.walkerUserId)
+                        {
+                            ActionButton("Pratite šetača", colorResource(R.color.green_accent)) {
+                                locationViewModel.getWalkerLocation(sharedViewModel.selectedReservation?.walker!!)
+                                navController.navigate(Routes.TrackLocation.route)
+                            }
+                        }
+                    }
+
 
                     !reservation.completed ->
                         ReservationText(
@@ -202,6 +217,8 @@ fun ReservationDetailsScreen(
                 }
                 Spacer(modifier = Modifier.size(20.dp))
 
+                val context = LocalContext.current
+
                 if (authViewModel.currentUser?.uid == reservation.walkerUserId) {
                     when {
                         !reservation.accepted ->
@@ -213,12 +230,20 @@ fun ReservationDetailsScreen(
                         reservation.accepted && !reservation.completed && !reservation.started ->
                             ActionButton("Započni šetnju", colorResource(R.color.green_accent)) {
                                 reservationViewModel.startWalk(reservation)
+                                Intent(context, LocationService::class.java).apply {
+                                    action = LocationService.ACTION_START
+                                    context.startService(this)
+                                }
                                 navController.popBackStack()
                             }
 
                         reservation.started && !reservation.completed ->
                             ActionButton("Završi šetnju", Color.Red) {
                                 reservationViewModel.endWalk(reservation)
+                                Intent(context, LocationService::class.java).apply {
+                                    action = LocationService.ACTION_STOP
+                                    context.startService(this)
+                                }
                                 navController.popBackStack()
                             }
                     }
