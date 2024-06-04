@@ -25,7 +25,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +47,7 @@ import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun ReservationDetailsScreen(
     reservation: Reservation,
@@ -81,8 +86,6 @@ fun ReservationDetailsScreen(
                 .fillMaxWidth()
                 .wrapContentWidth()
                 .padding(15.dp)
-                .background(colorResource(R.color.box_bkg_white), RoundedCornerShape(8.dp))
-                .padding(15.dp)
                 .height(IntrinsicSize.Min)
         ) {
             Column(
@@ -93,7 +96,7 @@ fun ReservationDetailsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Rezervacija",
+                    text = "Detalji rezervacije",
                     style = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 23.sp,
@@ -123,6 +126,11 @@ fun ReservationDetailsScreen(
                     contentDescription = "User image",
                 )
                 Spacer(modifier = Modifier.size(15.dp))
+                val fontFamily = FontFamily(Font(
+                    R.font.opensans_variable, variationSettings = FontVariation.Settings(
+                        FontVariation.weight(100)
+                    )
+                ))
                 Text(
                     text = if (authViewModel.currentUser?.uid == reservation.walkerUserId) {
                         reservation.user?.user?.name.toString()
@@ -134,44 +142,83 @@ fun ReservationDetailsScreen(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
+                        color = colorResource(R.color.background_dark)
+                    )
+                )
+                Spacer(modifier = Modifier.size(20.dp))
+                Text(
+                    text = "Tip šetnje",
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        color = colorResource(R.color.gray)
+                    )
+                )
+                Text(
+                    text = reservation.walkType.walkName,
+                    style = TextStyle(
+                        fontFamily = fontFamily,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Thin,
+                        textAlign = TextAlign.Center,
                         color = colorResource(R.color.gray)
                     )
                 )
                 Spacer(modifier = Modifier.size(10.dp))
-
                 Text(
-                    text = reservation.walkType.walkName,
+                    text = "Datum šetnje",
                     style = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
-                        color = Color.Gray
+                        color = colorResource(R.color.gray)
                     )
                 )
-                Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = "${reservation.dateOfWalk}",
                     style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = fontFamily,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Thin,
                         textAlign = TextAlign.Center,
-                        color = Color.Gray
+                        color = colorResource(R.color.gray)
                     )
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = "${reservation.timeOfWalk}",
+                    text = "Vrijeme šetnje",
                     style = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
-                        color = Color.Gray
+                        color = colorResource(R.color.gray)
+                    )
+                )
+                Text(
+                    text = "${reservation.timeOfWalk}",
+                    style = TextStyle(
+                        fontFamily = fontFamily,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Thin,
+                        textAlign = TextAlign.Center,
+                        color = colorResource(R.color.gray)
                     )
                 )
                 Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = "Cijena šetnje",
+                    style = TextStyle(
+                        fontFamily = Opensans,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        color = colorResource(R.color.gray)
+                    )
+                )
                 Text(
                     text = "${reservation.price} €",
                     style = TextStyle(
@@ -179,7 +226,7 @@ fun ReservationDetailsScreen(
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-                        color = Color.Gray
+                        color = colorResource(R.color.gray)
                     )
                 )
                 Spacer(modifier = Modifier.size(10.dp))
@@ -262,7 +309,6 @@ fun ReservationDetailsScreen(
                         navController.popBackStack()
                     }
                 }
-                Spacer(modifier = Modifier.size(20.dp))
                 ActionButton("Natrag", colorResource(R.color.green_accent)) {
                     navController.popBackStack()
                 }

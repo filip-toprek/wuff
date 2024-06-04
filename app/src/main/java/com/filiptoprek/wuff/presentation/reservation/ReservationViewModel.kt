@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import arrow.core.raise.result
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.location.Location
@@ -17,6 +19,7 @@ import com.filiptoprek.wuff.domain.repository.location.LocationRepository
 import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
+import com.filiptoprek.wuff.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +34,6 @@ class ReservationViewModel @Inject constructor(
     private val homeRepository: HomeRepository,
     private val validateReservationUseCase: ValidateReservationUseCase,
     private val profileRepository: ProfileRepository,
-    private val locationRepository: LocationRepository
 ): ViewModel(){
 
     private val _reservationFlow = MutableStateFlow<Resource<Any>?>(null)

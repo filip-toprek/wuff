@@ -137,7 +137,7 @@ fun HomeScreen(
             ) {
                 Spacer(modifier = Modifier.size(20.dp))
 
-                if(profileViewModel.userProfile?.walker != null)
+                if(profileViewModel.userProfile?.walker?.approved == true)
                 {
                     Text(
                         text = "Pozdrav, ${profileViewModel.userProfile?.user?.name.toString().split(" ")[0]}",

@@ -1,6 +1,7 @@
 package com.filiptoprek.wuff.data.repository.reservation
 
 import android.content.Intent
+import android.util.Log
 import com.filiptoprek.wuff.data.utils.await
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile

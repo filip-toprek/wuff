@@ -41,6 +41,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
 import com.filiptoprek.wuff.presentation.auth.LoginScreen
