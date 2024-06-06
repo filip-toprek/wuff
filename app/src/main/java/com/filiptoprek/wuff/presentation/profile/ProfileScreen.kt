@@ -193,7 +193,7 @@ fun userProfile(
                         color = colorResource(R.color.gray)
                     )
                     Spacer(modifier = Modifier.size(10.dp))
-                    if(profileViewModel?.userProfile?.walker != null)
+                    if(profileViewModel?.userProfile?.walker != null && profileViewModel.userProfile?.walker?.approved == true)
                     {
                         Text(
                             text = profileViewModel.userProfile?.walker?.averageRating.toString() + "/5.0",

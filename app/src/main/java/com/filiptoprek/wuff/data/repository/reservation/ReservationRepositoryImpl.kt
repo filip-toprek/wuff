@@ -9,6 +9,7 @@ import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.service.LocationService
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import java.math.BigDecimal
@@ -59,6 +60,8 @@ class ReservationRepositoryImpl @Inject constructor(
         return try {
             firebaseFirestore.collection("reservations").document(reservationId)
                 .update("started", true).await()
+            firebaseFirestore.collection("reservations").document(reservationId)
+                .update("timeWalkStarted", Timestamp.now()).await()
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Failure(e)
@@ -93,6 +96,9 @@ class ReservationRepositoryImpl @Inject constructor(
         return try {
             firebaseFirestore.collection("reservations").document(reservation.reservationId)
                 .update("completed", true).await()
+
+            firebaseFirestore.collection("reservations").document(reservation.reservationId)
+                .update("timeWalkEnded", Timestamp.now()).await()
 
             val user = firebaseFirestore.collection("users").document(reservation.userId).get().await().toObject(UserProfile::class.java)!!
             firebaseFirestore.collection("users").document(reservation.userId).update("pendingBalance", user.pendingBalance.minus(reservation.price)).await()

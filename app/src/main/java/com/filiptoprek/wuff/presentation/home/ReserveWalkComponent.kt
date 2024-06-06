@@ -420,22 +420,22 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
     val context = LocalContext.current
 
     val date = remember {
-        Calendar.getInstance().apply {
-            set(Calendar.YEAR, 2024)
-            set(Calendar.MONTH, 5)
-            set(Calendar.DAY_OF_MONTH, 17)
-        }.timeInMillis
+        Calendar.getInstance().timeInMillis
     }
+
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = date,
-        yearRange = 2024..2024
+        yearRange = Calendar.getInstance().get(Calendar.YEAR)..Calendar.getInstance().get(Calendar.YEAR)
     )
+
     var showDatePicker by remember { mutableStateOf(false) }
+
     val timePickerState = rememberTimePickerState(
         initialHour = 14,
         initialMinute = 30,
         is24Hour = true,
     )
+
     var showTimePicker by remember { mutableStateOf(false) }
 
 
@@ -451,7 +451,7 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
             containerColor = colorResource(R.color.green_accent)
         ),
         onClick = {
-            showDatePicker = true //changing the visibility state
+            showDatePicker = true
         },
     ) {
         Text(
@@ -483,7 +483,7 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
             containerColor = colorResource(R.color.green_accent)
         ),
         onClick = {
-            showTimePicker = true //changing the visibility state
+            showTimePicker = true
         },
     ) {
         Text(

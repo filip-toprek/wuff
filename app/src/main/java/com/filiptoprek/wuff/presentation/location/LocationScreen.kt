@@ -1,5 +1,9 @@
 package com.filiptoprek.wuff.presentation.location
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,18 +22,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.ui.theme.Pattaya
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -119,9 +127,10 @@ fun LocationScreen(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraState,
                 properties = MapProperties(
-                    isMyLocationEnabled = true,
+                    isMyLocationEnabled = false,
                     mapType = MapType.NORMAL,
                     isTrafficEnabled = false,
+                    minZoomPreference = 14.0f
                 )
             ) {
                 Marker(
@@ -130,8 +139,18 @@ fun LocationScreen(
                     snippet = "Ovdje se trenutno nalazi vaš šetač",
                     draggable = false,
                     flat = true,
+                    icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.marker)
                 )
             }
         }
+    }
+}
+
+private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
+    return ContextCompat.getDrawable(context, vectorResId)?.run {
+        setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+        val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+        draw(Canvas(bitmap))
+        BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 }

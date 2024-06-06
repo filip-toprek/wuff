@@ -21,6 +21,7 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun becomeWalker(userProfile: UserProfile, userId: String): Resource<UserProfile>? {
         return try{
             firebaseFirestore.collection("users").document(userId).update("walker", userProfile.walker).await()
+            firebaseFirestore.collection("users").document(userId).update("dateUpdated", System.currentTimeMillis()).await()
             Resource.Success(userProfile)
         }catch (e: Exception)
         {
@@ -31,6 +32,7 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun updateUserProfile(userProfile: UserProfile, userId: String): Resource<UserProfile> {
         return try {
             firebaseFirestore.collection("users").document(userId).update("aboutUser", userProfile.aboutUser).await()
+            firebaseFirestore.collection("users").document(userId).update("dateUpdated", System.currentTimeMillis()).await()
             Resource.Success(userProfile)
         }catch (e: Exception)
         {

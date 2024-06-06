@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -39,6 +40,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -85,7 +87,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Remove all listeners to avoid memory leaks
         for (listener in reservationListeners.values) {
             listener.remove()
         }
@@ -100,12 +101,45 @@ class MainActivity : ComponentActivity() {
                 return@addSnapshotListener
             }
 
+            val sharedPreferences: SharedPreferences = this.getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
+
+
             if (snapshot != null && snapshot.exists()) {
-                val started = snapshot.getBoolean("started")!!
-                val completed = snapshot.getBoolean("completed")!!
-                if (started && !completed) {
-                    sharedViewModel.selectedReservation = snapshot.toObject(Reservation::class.java)
+                val reservation: Reservation = snapshot.toObject(Reservation::class.java)!!
+
+                val started = reservation.started
+                val completed = reservation.completed
+
+                val notifiedWalkStartKey = "notifiedStart_$reservationId"
+                val notifiedWalkEndKey = "notifiedEnd_$reservationId"
+                val hasBeenNotifiedWalkStarted = sharedPreferences.getBoolean(notifiedWalkStartKey, false)
+                val hasBeenNotifiedWalkEnded = sharedPreferences.getBoolean(notifiedWalkEndKey, false)
+
+                if (started && !completed && !hasBeenNotifiedWalkStarted && authViewModel.currentUser?.uid == reservation.userId) {
                     sendNotification("Štenja započeta.", "Vaša šetnja je započela.")
+
+                    with(sharedPreferences.edit()) {
+                        putBoolean(notifiedWalkStartKey, true)
+                        apply()
+                    }
+                }else if (started && completed && !hasBeenNotifiedWalkEnded)
+                {
+                    val timeDiffMillis = reservation.timeWalkEnded.toDate().time - reservation.timeWalkStarted.toDate().time
+                    val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiffMillis)
+                    val seconds = TimeUnit.MILLISECONDS.toSeconds(timeDiffMillis) % 60
+
+                    if(reservation.timeWalkEnded == reservation.timeWalkStarted)
+                    {
+                        sendNotification("Šetnja završena.", "Hvala na koreištenju Wuff! aplikacije.")
+                    }else
+                    {
+                        sendNotification("Šetnja završena.", "Trajanje šetnje: ${minutes} minuta i ${seconds} sekundi")
+                    }
+
+                    with(sharedPreferences.edit()) {
+                        putBoolean(notifiedWalkEndKey, true)
+                        apply()
+                    }
                 }
             } else {
                 Log.d("FirestoreError", "Current data: null")

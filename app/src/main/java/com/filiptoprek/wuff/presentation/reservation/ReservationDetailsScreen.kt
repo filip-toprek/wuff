@@ -46,6 +46,7 @@ import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -253,6 +254,34 @@ fun ReservationDetailsScreen(
                         )
 
                     reservation.completed && authViewModel.currentUser?.uid == reservation.userId -> {
+                        if(reservation.timeWalkEnded != reservation.timeWalkStarted)
+                        {
+                            Text(
+                                text = "Trajanje šetnje",
+                                style = TextStyle(
+                                    fontFamily = Opensans,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    textAlign = TextAlign.Center,
+                                    color = colorResource(R.color.gray)
+                                )
+                            )
+
+                            val timeDiffMillis = reservation.timeWalkEnded.toDate().time - reservation.timeWalkStarted.toDate().time
+                            val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiffMillis)
+                            val seconds = TimeUnit.MILLISECONDS.toSeconds(timeDiffMillis) % 60
+                            Text(
+                                text = "${minutes} minuta i ${seconds} sekundi",
+                                style = TextStyle(
+                                    fontFamily = fontFamily,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Thin,
+                                    textAlign = TextAlign.Center,
+                                    color = colorResource(R.color.gray)
+                                )
+                            )
+                            Spacer(modifier = Modifier.size(10.dp))
+                        }
                         ReservationText("Šetnja je završena", colorResource(R.color.green_accent))
                         if (!reservation.rated) {
                             ActionButton("Ocijenite šetnju", colorResource(R.color.green_accent)) {
@@ -262,7 +291,7 @@ fun ReservationDetailsScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.size(10.dp))
 
                 val context = LocalContext.current
 

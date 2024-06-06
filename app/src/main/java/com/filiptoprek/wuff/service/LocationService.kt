@@ -49,10 +49,12 @@ class LocationService: Service() {
 
     private fun start()
     {
+        if(authRepository.currentUser == null)
+            return
+
         val notification = NotificationCompat.Builder(this, "location")
             .setContentTitle("Šetnja u tijeku...")
-            .setContentText("Location: null")
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.color.ic_launcher_background)
             .setOngoing(true)
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

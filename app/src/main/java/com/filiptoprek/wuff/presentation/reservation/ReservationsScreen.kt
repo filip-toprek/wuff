@@ -227,15 +227,14 @@ fun reservationCard(
         onRefresh = { refreshing = true },
     ) {
         val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-        val sortedReservationList = reservationList.sortedBy { reservation ->
+        val sortedReservationList = reservationList.sortedByDescending { reservation ->
             LocalDate.parse(reservation?.dateOfWalk, dateFormatter)
         }
         LazyColumn(
             modifier = Modifier.fillMaxHeight()
         ) {
             items(sortedReservationList) { reservation ->
-                if(hideCompleted && (reservation?.completed!! || reservation?.declined!!))
+                if(hideCompleted && (reservation?.completed!! || reservation.declined))
                 {
                     return@items
                 }

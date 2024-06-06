@@ -79,7 +79,6 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
     var errorText by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
-            .background(colorResource(R.color.background_white))
             .fillMaxSize()
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
@@ -105,8 +104,6 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentWidth()
-                .padding(15.dp)
-                .background(colorResource(R.color.box_bkg_white), RoundedCornerShape(8.dp))
                 .padding(15.dp)
                 .height(IntrinsicSize.Min)
         ) {
