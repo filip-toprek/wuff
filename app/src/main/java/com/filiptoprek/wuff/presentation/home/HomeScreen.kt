@@ -49,6 +49,7 @@ import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.navigation.Routes
+import com.filiptoprek.wuff.presentation.location.LocationViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
@@ -64,10 +65,9 @@ import kotlinx.coroutines.delay
 fun HomeScreen(
     navController: NavHostController,
     homeViewModel: HomeViewModel,
-    reservationViewModel: ReservationViewModel,
     profileViewModel: ProfileViewModel,
-    reloadViewModel: ReloadViewModel,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    locationViewModel: LocationViewModel
     ){
     val homeFlow = homeViewModel.homeFlow.collectAsState()
     val walkerList = homeViewModel.walkerList.collectAsState()
@@ -84,6 +84,7 @@ fun HomeScreen(
                 isLoading = true
             }
             is Resource.Success -> {
+                locationViewModel.getLocationOnStart()
                 isLoading = false
             }
         }
@@ -159,7 +160,7 @@ fun HomeScreen(
                             containerColor = colorResource(R.color.green_accent)
                         ),
                         onClick = {
-
+                            navController.navigate(Routes.Withdrawals.route)
                         })
                     {
                         Text(
@@ -300,6 +301,32 @@ fun walkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navC
         LazyColumn(
             modifier = Modifier.fillMaxHeight()
         ) {
+            if(walkerList.isEmpty())
+            {
+                items(1){
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.Top),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Text(
+                            text = "Trenutno nema šetača u vašem mjestu.",
+                            style = TextStyle(
+                                fontFamily = Opensans,
+                                fontSize = 13.sp,
+                                lineHeight = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                            ),
+                            color = colorResource(R.color.gray)
+                        )
+                    }
+                }
+            }
             items(walkerList) { walker ->
                 Row(
                     modifier = Modifier

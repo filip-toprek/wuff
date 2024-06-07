@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Interpolator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,22 +18,28 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.domain.model.location.animateMarker
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.ui.theme.Pattaya
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -44,6 +51,11 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun LocationScreen(
@@ -56,6 +68,9 @@ fun LocationScreen(
         mutableStateOf(false)
     }
     val locationFlow = locationViewModel.locationFlow.collectAsState()
+    val cameraState = rememberCameraPositionState()
+    val markerState = rememberMarkerState(position= LatLng(locationViewModel.location.value?.latitude ?: 45.55111, locationViewModel.location.value?.longitude ?: 18.69389))
+
     Column(
         modifier = Modifier
             .background(colorResource(R.color.background_white))
@@ -87,15 +102,6 @@ fun LocationScreen(
                     isSuccess.value = false;
                 }
                 Resource.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                            .wrapContentHeight(Alignment.CenterVertically),
-                        color = colorResource(R.color.green_accent)
-                    )
-                    isSuccess.value = false;
-
                 }
                 is Resource.Success -> {
                     isSuccess.value = true;
@@ -105,23 +111,35 @@ fun LocationScreen(
 
         if(isSuccess.value)
         {
-            val cameraState = rememberCameraPositionState()
-            var currentLoc = remember {
-                mutableStateOf(
-                    LatLng(
-                        0.0,
-                        0.0
-                    )
-                )
+            val lifecycleOwner = LocalLifecycleOwner.current
+
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_PAUSE) {
+                        locationViewModel.stopLocationUpdates()
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                    locationViewModel.stopLocationUpdates()
+                }
             }
+
             locationViewModel.location.observeForever { location ->
-                currentLoc.value = LatLng(location.latitude, location.longitude)
-                cameraState.position = CameraPosition.builder()
-                    .target(currentLoc.value)
-                    .zoom(18F)
-                    .bearing(0F)
-                    .tilt(0F)
-                    .build();
+                val endLocation = LatLng(location.latitude, location.longitude)
+                //markerState.position = endLocation
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    cameraState.animate(
+                        update = CameraUpdateFactory.newCameraPosition(
+                            CameraPosition(markerState.position, 18F, 0f, 0f)
+                        ),
+                        durationMs = 1000
+                    )
+                    animateMarker(endLocation, markerState)
+                }
             }
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
@@ -134,7 +152,7 @@ fun LocationScreen(
                 )
             ) {
                 Marker(
-                    state = MarkerState(position = currentLoc.value),
+                    state = markerState,
                     title = "Šetač ${sharedViewModel.selectedReservation?.walker?.user?.name!!.split(" ")[0]}",
                     snippet = "Ovdje se trenutno nalazi vaš šetač",
                     draggable = false,

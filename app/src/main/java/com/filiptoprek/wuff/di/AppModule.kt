@@ -11,6 +11,7 @@ import com.filiptoprek.wuff.data.repository.profile.ProfileRepositoryImpl
 import com.filiptoprek.wuff.data.repository.rating.RatingRepositoryImpl
 import com.filiptoprek.wuff.data.repository.reload.ReloadRepositoryImpl
 import com.filiptoprek.wuff.data.repository.reservation.ReservationRepositoryImpl
+import com.filiptoprek.wuff.data.repository.withdraw.WithdrawRepositoryImpl
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.filiptoprek.wuff.domain.repository.home.HomeRepository
 import com.filiptoprek.wuff.domain.repository.location.LocationClient
@@ -19,6 +20,7 @@ import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
 import com.filiptoprek.wuff.domain.repository.rating.RatingRepository
 import com.filiptoprek.wuff.domain.repository.reload.ReloadRepository
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
+import com.filiptoprek.wuff.domain.repository.withdraw.WithdrawRepository
 import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateEmailUseCase
 import com.filiptoprek.wuff.domain.usecase.auth.ValidateNameUseCase
@@ -28,6 +30,9 @@ import com.filiptoprek.wuff.domain.usecase.reload.ValidateCVVUseCase
 import com.filiptoprek.wuff.domain.usecase.reload.ValidateCardDateUseCase
 import com.filiptoprek.wuff.domain.usecase.reload.ValidateReloadFormUseCase
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
+import com.filiptoprek.wuff.domain.usecase.withdraw.ValidateWIthdraw
+import com.filiptoprek.wuff.domain.usecase.withdraw.ValidateWithdrawForm
+import com.filiptoprek.wuff.domain.usecase.withdraw.ValidateWithdrawProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -80,6 +85,10 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideWithdrawRepository(impl: WithdrawRepositoryImpl): WithdrawRepository = impl
+
+    @Provides
+    @Singleton
     fun provideLocationClient(impl: LocationClientImpl): LocationClient = impl
 
     @Provides
@@ -117,6 +126,15 @@ object AppModule {
             validName = ValidateNameUseCase(),
             validEmail = ValidateEmailUseCase(),
             validPassword = ValidatePasswordUseCase(),
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideWithdrawFormValidatorUseCase(): ValidateWithdrawForm {
+        return ValidateWithdrawForm(
+            validateWithdraw = ValidateWIthdraw(),
+            validateWithdrawProfile = ValidateWithdrawProfile()
         )
     }
 

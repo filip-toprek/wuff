@@ -8,4 +8,5 @@ interface ProfileRepository {
     suspend fun getUserProfile(userId: String): UserProfile?
     suspend fun updateUserProfile(userProfile: UserProfile, userId: String): Resource<UserProfile>?
     suspend fun becomeWalker(userProfile: UserProfile, userId: String): Resource<UserProfile>?
+    suspend fun updateUserCity(userId: String, city: String)
 }

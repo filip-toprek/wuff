@@ -13,4 +13,6 @@ sealed class Routes(val route: String) {
     object ResereveWalk : Routes("ReserveWalkScreen")
     object Reload : Routes("ReloadScreen")
     object TrackLocation : Routes("LocationScreen")
+    object Withdrawals : Routes("WithdrawalsScreen")
+    object CreateWithdraw : Routes("WithdrawRequestScreen")
 }

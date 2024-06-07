@@ -17,6 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val homeRepository: HomeRepository,
+    private val profileRepository: ProfileRepository,
+    private val authRepository: AuthRepository
 ): ViewModel(){
     private val _homeFlow = MutableStateFlow<Resource<List<UserProfile?>>?>(null)
     val homeFlow: StateFlow<Resource<List<UserProfile?>>?> = _homeFlow
@@ -37,8 +39,9 @@ class HomeViewModel @Inject constructor(
 
     private fun getWalkers() {
         viewModelScope.launch {
+            val currentUserProfile = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
             _homeFlow.value = Resource.Loading
-            val result = homeRepository.getWalkerList()
+            val result = homeRepository.getWalkerList(currentUserProfile)
 
             if(result.isEmpty())
             {
@@ -50,4 +53,5 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
 }

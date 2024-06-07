@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.presentation.reload
+package com.filiptoprek.wuff.presentation.withdraw
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,23 +41,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
-import com.filiptoprek.wuff.domain.model.reload.Reload
 import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.domain.model.reload.Reload
+import com.filiptoprek.wuff.domain.model.withdraw.Withdraw
+import com.filiptoprek.wuff.domain.model.withdraw.WithdrawProfile
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
-
+import com.google.firebase.Timestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostController)
-{
-    var reloadFlow = reloadViewModel.reloadFlow.collectAsState()
-    var ccNum by remember { mutableStateOf("") }
-    var reloadAmount by remember { mutableStateOf("") }
-    var cvvNum by remember { mutableStateOf("") }
-    var ccDate by remember { mutableStateOf("") }
-    var ccYear by remember { mutableStateOf("") }
+fun WithdrawRequestScreen(
+    navController: NavHostController,
+    withdrawViewModel: WithdrawViewModel,
+) {
+    val withdrawFlow = withdrawViewModel.createWithdrawFlow.collectAsState()
+    val withdrawals = withdrawViewModel.withdrawList.collectAsState()
+    var iban by remember { mutableStateOf(withdrawals.value?.withdrawProfile?.iban.toString()) }
+    var swift by remember { mutableStateOf(withdrawals.value?.withdrawProfile?.swift.toString()) }
+    var withdrawAmount by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf("") }
 
     Column(
@@ -101,7 +104,7 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Nadopuni novčanik",
+                    text = "Nova isplata",
                     style = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 23.sp,
@@ -114,7 +117,7 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                 )
                 Spacer(modifier = Modifier.size(20.dp))
                 Text(
-                    text = "Broj kratice",
+                    text = "IBAN",
                     color = colorResource(R.color.gray),
                     style = TextStyle(
                         fontFamily = Opensans,
@@ -127,7 +130,7 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                 Spacer(modifier = Modifier.size(5.dp))
                 TextField(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    value = ccNum,
+                    value = iban,
                     textStyle = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 15.sp,
@@ -135,15 +138,12 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                         textAlign = TextAlign.Start,
                         color = colorResource(R.color.gray),
                     ),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
                     supportingText = {
 
                     },
                     onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() } && newValue.length <= 16) {
-                            ccNum = newValue
+                        if (newValue.isNotEmpty() && newValue.length <= 21) {
+                            iban = newValue
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
@@ -157,7 +157,7 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                     ),
                 )
                 Text(
-                    text = "Datum i godina isteka",
+                    text = "SWIFT",
                     color = colorResource(R.color.gray),
                     style = TextStyle(
                         fontFamily = Opensans,
@@ -168,88 +168,8 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                     )
                 )
                 Spacer(modifier = Modifier.size(5.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    TextField(
-                        modifier = Modifier.width(50.dp),
-                        value = ccDate,
-                        textStyle = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Start,
-                            color = colorResource(R.color.gray),
-                        ),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        supportingText = {
-
-                        },
-                        onValueChange = { newValue ->
-                            if (newValue.all { it.isDigit() } && newValue.length <= 2) {
-                                ccDate = newValue
-                            }
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            unfocusedTextColor = colorResource(R.color.gray),
-                            containerColor = Color.White,
-                            cursorColor = colorResource(R.color.green_accent),
-                            disabledLabelColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                    )
-                    Spacer(modifier = Modifier.size(20.dp))
-                    TextField(
-                        modifier = Modifier.width(50.dp),
-                        value = ccYear,
-                        textStyle = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Start,
-                            color = colorResource(R.color.gray),
-                        ),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        supportingText = {
-
-                        },
-                        onValueChange = { newValue ->
-                            if (newValue.all { it.isDigit() } && newValue.length <= 2) {
-                                ccYear = newValue
-                            }
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            unfocusedTextColor = colorResource(R.color.gray),
-                            containerColor = Color.White,
-                            cursorColor = colorResource(R.color.green_accent),
-                            disabledLabelColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                    )
-                }
-                Text(
-                    text = "CVV",
-                    color = colorResource(R.color.gray),
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                )
                 TextField(
-                    modifier = Modifier.width(60.dp),
-                    value = cvvNum,
+                    value = swift,
                     textStyle = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 15.sp,
@@ -257,15 +177,12 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                         textAlign = TextAlign.Start,
                         color = colorResource(R.color.gray),
                     ),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
                     supportingText = {
 
                     },
                     onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() } && newValue.length <= 3) {
-                            cvvNum = newValue
+                        if (newValue.length <= 11) {
+                            swift = newValue
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
@@ -280,7 +197,7 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = "Vrijednost nadoplate",
+                    text = "Vrijednost isplate",
                     color = colorResource(R.color.gray),
                     style = TextStyle(
                         fontFamily = Opensans,
@@ -292,7 +209,7 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                 )
                 TextField(
                     modifier = Modifier.width(60.dp),
-                    value = reloadAmount,
+                    value = withdrawAmount,
                     textStyle = TextStyle(
                         fontFamily = Opensans,
                         fontSize = 15.sp,
@@ -307,8 +224,8 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
 
                     },
                     onValueChange = { newValue ->
-                        if (newValue.all { it.isDigit() } && newValue.length <= 2) {
-                            reloadAmount = newValue
+                        if (newValue.length <= 2) {
+                            withdrawAmount = newValue
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
@@ -321,15 +238,13 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                         unfocusedIndicatorColor = Color.Transparent
                     ),
                 )
-                reloadFlow.value?.let {
+                withdrawFlow.value?.let {
                     when (it) {
                         is Resource.Failure -> {
                             errorText = when(it.exception.message.toString())
                             {
-                                "BAD_CVV" -> "Loše unesen CVV"
-                                "CARD_EXPIRED" -> "Kartica je istekla"
-                                "BAD_AMOUNT" -> "Unesite vrijednost nadoplate"
-                                "BAD_CARD" -> "Unesite broj kartice"
+                                "BAD_IBAN" -> "Loše unesen IBAN"
+                                "BAD_AMOUNT" -> "Unesite vrijednost isplate"
                                 else -> it.exception.message.toString()
                             }
                         }
@@ -346,7 +261,7 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
 
                         is Resource.Success -> {
                             navController.popBackStack()
-                            navController.navigate(Routes.Home.route)
+                            navController.navigate(Routes.Withdrawals.route)
                         }
                     }
                 }
@@ -371,12 +286,13 @@ fun ReloadScreen(reloadViewModel: ReloadViewModel, navController: NavHostControl
                     ),
                     onClick = {
                         errorText = ""
-                        reloadViewModel.reloadBalance(Reload(try { reloadAmount.toDouble()} catch(e: Exception) { Double.NaN }), ccYear, ccDate, cvvNum, ccNum)
+                        withdrawViewModel.createWithdrawal(Withdraw(try { withdrawAmount.toDouble()} catch(e: Exception) { Double.NaN },
+                            Timestamp.now(), false), if(withdrawals.value?.withdrawProfile!! == WithdrawProfile()) WithdrawProfile(iban, swift) else withdrawals.value?.withdrawProfile!!)
                     })
                 {
                     Text(
                         modifier = Modifier,
-                        text = "Nadoplati",
+                        text = "Isplati",
                         style = TextStyle(
                             fontFamily = Opensans,
                             fontSize = 15.sp,

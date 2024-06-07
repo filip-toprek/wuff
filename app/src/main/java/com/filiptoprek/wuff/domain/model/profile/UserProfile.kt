@@ -13,6 +13,7 @@ data class UserProfile(
     val dateUpdated: Long = System.currentTimeMillis(),
     val transactions: List<Transaction> = listOf(),
     val walker: Walker? = null,
+    val city: String = ""
 )
 
 data class UserData(

@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.findNavController
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
+import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.navigation.SetupNavGraph
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
@@ -32,6 +33,7 @@ import com.filiptoprek.wuff.presentation.rating.RatingViewModel
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
+import com.filiptoprek.wuff.presentation.withdraw.WithdrawViewModel
 import com.filiptoprek.wuff.ui.theme.WuffTheme
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.GoogleMap
@@ -40,6 +42,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -53,12 +56,16 @@ class MainActivity : ComponentActivity() {
     private val ratingViewModel by viewModels<RatingViewModel>()
     private val sharedViewModel by viewModels<SharedViewModel>()
     private val locationViewModel by viewModels<LocationViewModel>()
+    private val withdrawViewModel by viewModels<WithdrawViewModel>()
 
     @Inject
     lateinit var googleSignInClient: GoogleSignInClient
 
     @Inject
     lateinit var firestore: FirebaseFirestore
+
+    @Inject
+    lateinit var authRepository: AuthRepository
 
     private val reservationListeners = mutableMapOf<String, ListenerRegistration>()
     private fun sendNotification(title: String, message: String) {
@@ -115,7 +122,7 @@ class MainActivity : ComponentActivity() {
                 val hasBeenNotifiedWalkStarted = sharedPreferences.getBoolean(notifiedWalkStartKey, false)
                 val hasBeenNotifiedWalkEnded = sharedPreferences.getBoolean(notifiedWalkEndKey, false)
 
-                if (started && !completed && !hasBeenNotifiedWalkStarted && authViewModel.currentUser?.uid == reservation.userId) {
+                if (started && !completed && !hasBeenNotifiedWalkStarted && authRepository.currentUser?.uid == reservation.userId) {
                     sendNotification("Štenja započeta.", "Vaša šetnja je započela.")
 
                     with(sharedPreferences.edit()) {
@@ -189,6 +196,7 @@ class MainActivity : ComponentActivity() {
                     ratingViewModel = ratingViewModel,
                     sharedViewModel = sharedViewModel,
                     locationViewModel = locationViewModel,
+                    withdrawViewModel = withdrawViewModel,
                     googleSignInClient = googleSignInClient
                 )
             }

@@ -64,6 +64,9 @@ import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationsScreen
 import com.filiptoprek.wuff.presentation.reservation.ReserveWalkScreen
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
+import com.filiptoprek.wuff.presentation.withdraw.WithdrawRequestScreen
+import com.filiptoprek.wuff.presentation.withdraw.WithdrawViewModel
+import com.filiptoprek.wuff.presentation.withdraw.WithdrawalScreen
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.GoogleMap
 import com.google.firebase.auth.FirebaseUser
@@ -81,6 +84,7 @@ fun SetupNavGraph(
     ratingViewModel: RatingViewModel,
     sharedViewModel: SharedViewModel,
     locationViewModel: LocationViewModel,
+    withdrawViewModel: WithdrawViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
     val items = listOf(
@@ -201,7 +205,7 @@ fun SetupNavGraph(
             composable(
                 route = Routes.Home.route
             ) {
-                HomeScreen(navController, homeViewModel, reservationViewModel, profileViewModel, reloadViewModel, sharedViewModel)
+                HomeScreen(navController, homeViewModel, profileViewModel, sharedViewModel, locationViewModel)
                 BackHandler(true) {
                 }
             }
@@ -248,6 +252,16 @@ fun SetupNavGraph(
                 route = Routes.TrackLocation.route
             ){
                 LocationScreen(navController, locationViewModel, sharedViewModel)
+            }
+            composable(
+                route = Routes.Withdrawals.route
+            ){
+                WithdrawalScreen(navController, withdrawViewModel)
+            }
+            composable(
+                route = Routes.CreateWithdraw.route
+            ){
+                WithdrawRequestScreen(navController, withdrawViewModel)
             }
         }
     }

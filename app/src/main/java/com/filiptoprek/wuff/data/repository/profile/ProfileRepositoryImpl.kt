@@ -29,6 +29,15 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateUserCity(userId: String, city: String) {
+        try {
+            firebaseFirestore.collection("users").document(userId).update("city", city).await()
+        }catch (e: Exception)
+        {
+            //
+        }
+    }
+
     override suspend fun updateUserProfile(userProfile: UserProfile, userId: String): Resource<UserProfile> {
         return try {
             firebaseFirestore.collection("users").document(userId).update("aboutUser", userProfile.aboutUser).await()

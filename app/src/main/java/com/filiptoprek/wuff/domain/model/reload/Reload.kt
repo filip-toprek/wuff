@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.domain.model
+package com.filiptoprek.wuff.domain.model.reload
 
 import com.google.firebase.Timestamp
 

@@ -160,30 +160,7 @@ fun reservationCard(
 {
     var hideCompleted by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
-    if(reservationList.isEmpty())
-    {
-        Column(
-            modifier = Modifier
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .wrapContentHeight(Alignment.Top),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(modifier = Modifier.size(20.dp))
-            Text(
-                text = "Trenutno nemate rezervacija.",
-                style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 13.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-                color = colorResource(R.color.gray)
-            )
-        }
-    }else
-    {
+    if(reservationList.isNotEmpty()) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -202,7 +179,7 @@ fun reservationCard(
             RadioButton(
                 modifier = Modifier.size(25.dp),
                 selected = hideCompleted,
-                onClick = { hideCompleted = !hideCompleted},
+                onClick = { hideCompleted = !hideCompleted },
                 colors = RadioButtonColors(
                     selectedColor = colorResource(R.color.green_accent),
                     disabledUnselectedColor = colorResource(R.color.background_dark),
@@ -233,6 +210,32 @@ fun reservationCard(
         LazyColumn(
             modifier = Modifier.fillMaxHeight()
         ) {
+            if(reservationList.isEmpty()) {
+                items(1)
+                {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .wrapContentHeight(Alignment.Top),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Text(
+                            text = "Trenutno nemate rezervacija.",
+                            style = TextStyle(
+                                fontFamily = Opensans,
+                                fontSize = 13.sp,
+                                lineHeight = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                            ),
+                            color = colorResource(R.color.gray)
+                        )
+                    }
+                }
+            }
             items(sortedReservationList) { reservation ->
                 if(hideCompleted && (reservation?.completed!! || reservation.declined))
                 {

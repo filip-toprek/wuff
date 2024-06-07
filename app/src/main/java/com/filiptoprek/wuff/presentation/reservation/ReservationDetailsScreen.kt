@@ -240,7 +240,7 @@ fun ReservationDetailsScreen(
                         if(authViewModel.currentUser?.uid != reservation.walkerUserId)
                         {
                             ActionButton("Pratite šetača", colorResource(R.color.green_accent)) {
-                                locationViewModel.getWalkerLocation(sharedViewModel.selectedReservation?.walker!!)
+                                locationViewModel.startLocationUpdates(sharedViewModel.selectedReservation?.walker!!)
                                 navController.navigate(Routes.TrackLocation.route)
                             }
                         }

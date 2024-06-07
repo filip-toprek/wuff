@@ -9,9 +9,9 @@ interface ReservationRepository {
     suspend fun createReservation(reservation: Reservation): Resource<Unit>
     suspend fun getReservations(userId: String): List<Reservation>
     suspend fun getReservationsForWalker(userId: String): List<Reservation>
-    suspend fun declineReservations(reservationId: String): Resource<Unit>
-    suspend fun acceptReservations(reservationId: String): Resource<Unit>
+    suspend fun declineReservation(reservation: Reservation): Resource<Unit>
+    suspend fun acceptReservation(reservationId: String): Resource<Unit>
     suspend fun startWalk(reservationId: String): Resource<Unit>
     suspend fun endWalk(reservation: Reservation): Resource<Unit>
-    suspend fun deleteReservations(reservationId: String): Resource<Unit>
+    suspend fun deleteReservation(reservation: Reservation): Resource<Unit>
 }

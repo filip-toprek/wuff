@@ -9,7 +9,7 @@ import javax.inject.Inject
 class HomeRepositoryImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,)
     : HomeRepository {
-    override suspend fun getWalkerList(): List<UserProfile?> {
+    override suspend fun getWalkerList(user: UserProfile?): List<UserProfile?> {
         return try {
             val snapshot = firebaseFirestore.collection("users")
                 .get()
@@ -19,7 +19,15 @@ class HomeRepositoryImpl @Inject constructor(
                 .filter { document ->
                     val walker = document["walker"] as? Map<*, *>
                     val isApproved = walker?.get("approved") as? Boolean ?: false
-                    walker != null && isApproved
+                    val city = document["city"] as? String ?: ""
+                    if(user == null)
+                    {
+                        walker != null && isApproved
+
+                    }else
+                    {
+                        walker != null && isApproved && city == user.city
+                    }
                 }
                 .map { document ->
                     document.toObject(UserProfile::class.java)

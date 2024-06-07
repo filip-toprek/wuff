@@ -36,9 +36,12 @@ class ReservationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteReservations(reservationId: String): Resource<Unit> {
+    override suspend fun deleteReservation(reservation: Reservation): Resource<Unit> {
         return try {
-            firebaseFirestore.collection("reservations").document(reservationId)
+            val user = firebaseFirestore.collection("users").document(reservation.userId).get().await().toObject(UserProfile::class.java)!!
+            firebaseFirestore.collection("users").document(reservation.userId).update("pendingBalance", user.pendingBalance.minus(reservation.price)).await()
+
+            firebaseFirestore.collection("reservations").document(reservation.reservationId)
                 .delete().await()
             Resource.Success(Unit)
         } catch (e: Exception) {
@@ -46,7 +49,7 @@ class ReservationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun acceptReservations(reservationId: String): Resource<Unit> {
+    override suspend fun acceptReservation(reservationId: String): Resource<Unit> {
         return try {
             firebaseFirestore.collection("reservations").document(reservationId)
                 .update("accepted", true).await()
@@ -94,16 +97,12 @@ class ReservationRepositoryImpl @Inject constructor(
 
     override suspend fun endWalk(reservation: Reservation): Resource<Unit> {
         return try {
-            firebaseFirestore.collection("reservations").document(reservation.reservationId)
-                .update("completed", true).await()
 
             firebaseFirestore.collection("reservations").document(reservation.reservationId)
                 .update("timeWalkEnded", Timestamp.now()).await()
 
-            val user = firebaseFirestore.collection("users").document(reservation.userId).get().await().toObject(UserProfile::class.java)!!
-            firebaseFirestore.collection("users").document(reservation.userId).update("pendingBalance", user.pendingBalance.minus(reservation.price)).await()
-
-
+            firebaseFirestore.collection("reservations").document(reservation.reservationId)
+                .update("completed", true).await()
             transferCoins(reservation)
             Resource.Success(Unit)
         } catch (e: Exception) {
@@ -111,10 +110,14 @@ class ReservationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun declineReservations(reservationId: String): Resource<Unit> {
+    override suspend fun declineReservation(reservation: Reservation): Resource<Unit> {
         return try {
-            firebaseFirestore.collection("reservations").document(reservationId)
+            firebaseFirestore.collection("reservations").document(reservation.reservationId)
                 .update("declined", true).await()
+
+            val user = firebaseFirestore.collection("users").document(reservation.userId).get().await().toObject(UserProfile::class.java)!!
+            firebaseFirestore.collection("users").document(reservation.userId).update("pendingBalance", user.pendingBalance.minus(reservation.price)).await()
+
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Failure(e)

@@ -1,6 +1,6 @@
 package com.filiptoprek.wuff.domain.usecase.reload;
 
-import com.filiptoprek.wuff.domain.model.Reload
+import com.filiptoprek.wuff.domain.model.reload.Reload
 
 class ValidateReloadFormUseCase(
         private val validDate: ValidateCardDateUseCase,

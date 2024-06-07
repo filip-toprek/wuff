@@ -4,5 +4,5 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 
 interface HomeRepository {
-    suspend fun getWalkerList(): List<UserProfile?>
+    suspend fun getWalkerList(user: UserProfile? = null): List<UserProfile?>
 }

@@ -21,6 +21,7 @@ import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
 import com.filiptoprek.wuff.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -73,6 +74,11 @@ class ReservationViewModel @Inject constructor(
         super.onCleared()
     }
 
+    private suspend fun delayBeforeReset() {
+        delay(1500)
+        _reservationCreateFlow.value = null
+    }
+
     fun createReservation(reservation: Reservation) {
         if(validateReservationUseCase.validateReservationUseCase(reservation))
         {
@@ -81,14 +87,9 @@ class ReservationViewModel @Inject constructor(
                 reservation.userId = authRepository.currentUser?.uid.toString()
                 val result = reservationRepository.createReservation(reservation)
 
-                if(result != Resource.Success(Unit))
-                {
-                    _reservationCreateFlow.value = result
-                }else
-                {
-                    getReservationsList()
-                    _reservationCreateFlow.value = result
-                }
+                getReservationsList()
+                _reservationCreateFlow.value = result
+                delayBeforeReset()
             }
         }else
         {
@@ -131,7 +132,7 @@ class ReservationViewModel @Inject constructor(
     fun deleteReservation(reservation: Reservation) {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
-            val result = reservationRepository.deleteReservations(reservation.reservationId)
+            val result = reservationRepository.deleteReservation(reservation)
             _reservationFlow.value = result
             _reservationsList.value = emptyList<Reservation>()
             getReservationsList()
@@ -161,7 +162,7 @@ class ReservationViewModel @Inject constructor(
     fun acceptReservation(reservation: Reservation) {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
-            val result = reservationRepository.acceptReservations(reservation.reservationId)
+            val result = reservationRepository.acceptReservation(reservation.reservationId)
             _reservationFlow.value = result
             _reservationsList.value = emptyList<Reservation>()
             getReservationsList()
@@ -170,7 +171,7 @@ class ReservationViewModel @Inject constructor(
     fun declineReservation(reservation: Reservation) {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
-            val result = reservationRepository.declineReservations(reservation.reservationId)
+            val result = reservationRepository.declineReservation(reservation)
             _reservationFlow.value = result
             _reservationsList.value = emptyList<Reservation>()
             getReservationsList()

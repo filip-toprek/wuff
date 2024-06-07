@@ -57,19 +57,14 @@ class LocationService: Service() {
             .setSmallIcon(R.color.ic_launcher_background)
             .setOngoing(true)
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        //val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         locationClient.getLocationUpdates(10000L)
             .catch {e ->
                 e.printStackTrace()
             }
             .onEach {location->
-                val lat = location.latitude.toString()
-                val long = location.longitude.toString()
-                val updatedNotification = notification.setContentText("Location: ($lat, $long)")
-
                 sendLocationToBackend(Location(location.latitude, location.longitude, authRepository.currentUser?.uid.toString()))
-                notificationManager.notify(1, updatedNotification.build())
             }
             .launchIn(serviceScope)
 

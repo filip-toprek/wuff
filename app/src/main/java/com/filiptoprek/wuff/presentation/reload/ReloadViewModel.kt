@@ -2,13 +2,10 @@ package com.filiptoprek.wuff.presentation.reload
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.filiptoprek.wuff.domain.model.Reload
+import com.filiptoprek.wuff.domain.model.reload.Reload
 import com.filiptoprek.wuff.domain.model.auth.Resource
-import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
-import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
 import com.filiptoprek.wuff.domain.repository.reload.ReloadRepository
-import com.filiptoprek.wuff.domain.usecase.profile.ValidateAboutUserUseCase
 import com.filiptoprek.wuff.domain.usecase.reload.ValidateReloadFormUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
