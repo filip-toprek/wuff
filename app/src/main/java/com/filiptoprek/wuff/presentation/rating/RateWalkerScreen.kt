@@ -58,7 +58,6 @@ fun RateWalkerScreen(navController: NavHostController, ratingViewModel: RatingVi
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.box_bkg_white), RoundedCornerShape(8.dp))
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top),
         verticalArrangement = Arrangement.Center,
