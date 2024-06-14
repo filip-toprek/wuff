@@ -1,5 +1,6 @@
 package com.filiptoprek.wuff.data.repository.withdraw
 
+import android.util.Log
 import androidx.compose.animation.core.snap
 import arrow.fx.coroutines.Use
 import com.filiptoprek.wuff.data.utils.await
@@ -58,6 +59,7 @@ class WithdrawRepositoryImpl @Inject constructor(
                 .get()
                 .await().toObject(Withdrawals::class.java)!!
         } catch (e: Exception) {
+            Log.w("ERROR",e.message.toString())
             Withdrawals()
         }
     }

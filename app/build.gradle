@@ -17,11 +17,21 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+        android.buildFeatures.buildConfig true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
+        Properties properties = new Properties()
+        def localPropertiesFile = project.rootProject.file('local.properties')
+        if (localPropertiesFile.canRead()) {
+            properties.load(localPropertiesFile.newInputStream())
+        }
+
+        def stripePubKey = properties.getProperty('STRIPE_PUB_KEY', 'none')
+        buildConfigField 'String', 'STRIPE_PUB_KEY', "\"${stripePubKey}\""
+
     }
 
     buildTypes {
@@ -88,10 +98,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore-ktx:25.0.0'
     implementation 'androidx.compose.material3:material3-android:1.2.1'
     implementation 'com.google.firebase:firebase-messaging-ktx:24.0.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose-android:2.8.2'
     kapt("com.google.dagger:hilt-android-compiler:2.48.1")
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0'
 
     implementation "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
+    implementation "com.stripe:stripe-android:20.45.0"
+    implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
+    implementation 'com.github.kittinunf.fuel:fuel-json:2.3.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

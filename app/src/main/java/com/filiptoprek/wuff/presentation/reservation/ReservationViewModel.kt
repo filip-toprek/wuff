@@ -35,10 +35,14 @@ class ReservationViewModel @Inject constructor(
     private val homeRepository: HomeRepository,
     private val validateReservationUseCase: ValidateReservationUseCase,
     private val profileRepository: ProfileRepository,
+    private val locationRepository: LocationRepository
 ): ViewModel(){
 
     private val _reservationFlow = MutableStateFlow<Resource<Any>?>(null)
     val reservationFlow: StateFlow<Resource<Any>?> = _reservationFlow
+
+    private val _walkFlow = MutableStateFlow<Resource<Any>?>(null)
+    val walkFlow: StateFlow<Resource<Any>?> = _walkFlow
 
     private val _reservationCreateFlow = MutableStateFlow<Resource<Any>?>(null)
     val reservationCreateFlow: StateFlow<Resource<Any>?> = _reservationCreateFlow
@@ -141,9 +145,18 @@ class ReservationViewModel @Inject constructor(
 
     fun startWalk(reservation: Reservation) {
         viewModelScope.launch {
-            _reservationFlow.value = Resource.Loading
-            val result = reservationRepository.startWalk(reservation.reservationId)
-            _reservationFlow.value = result
+            _walkFlow.value = Resource.Loading
+            val walkerLocation = locationRepository.getLocation(reservation.walkerUserId)
+            val userLocation = locationRepository.getLocation(reservation.userId)
+            val result =
+                if(walkerLocation.isWithinProximity(walkerLocation, userLocation, 100.0))
+                {
+                    reservationRepository.startWalk(reservation.reservationId)
+                }else
+                {
+                    Resource.Failure(Exception("Error"))
+                }
+            _walkFlow.value = result
             _reservationsList.value = emptyList<Reservation>()
             getReservationsList()
         }

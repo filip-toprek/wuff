@@ -2,6 +2,7 @@ package com.filiptoprek.wuff.navigation
 
 import android.content.Context
 import android.os.Build
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import com.filiptoprek.wuff.MainActivity
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
 import com.filiptoprek.wuff.presentation.auth.LoginScreen
@@ -70,6 +72,7 @@ import com.filiptoprek.wuff.presentation.withdraw.WithdrawalScreen
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.GoogleMap
 import com.google.firebase.auth.FirebaseUser
+import kotlin.coroutines.coroutineContext
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)

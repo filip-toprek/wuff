@@ -56,9 +56,11 @@ class WithdrawViewModel @Inject constructor(
     private fun getWithdrawalsList() {
         viewModelScope.launch {
             val currentUserProfile = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
+            if(currentUserProfile?.walker?.approved != true)
+                return@launch
+
             _withdrawFlow.value = Resource.Loading
             val result = withdrawRepository.getWithdrawals(currentUserProfile!!)
-
             _withdrawList.value = result
             _withdrawFlow.value = Resource.Success(result)
         }

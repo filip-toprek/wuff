@@ -1,6 +1,7 @@
 package com.filiptoprek.wuff.presentation.reservation
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +40,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.data.repository.location.LocationClientImpl
+import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
@@ -59,6 +62,7 @@ fun ReservationDetailsScreen(
     sharedViewModel: SharedViewModel
 )
 {
+    val walkFlow = reservationViewModel.walkFlow.collectAsState()
     Column(
         modifier = Modifier
             .background(colorResource(R.color.background_white))
@@ -306,11 +310,24 @@ fun ReservationDetailsScreen(
                         reservation.accepted && !reservation.completed && !reservation.started ->
                             ActionButton("Započni šetnju", colorResource(R.color.green_accent)) {
                                 reservationViewModel.startWalk(reservation)
-                                Intent(context, LocationService::class.java).apply {
-                                    action = LocationService.ACTION_START
-                                    context.startService(this)
+
+                                walkFlow.value?.let {
+                                    when(it){
+                                        is Resource.Failure -> {
+                                            Toast.makeText(context, "Šetnju samo možete započeti u blizini korisnika.", Toast.LENGTH_LONG).show()
+                                        }
+                                        Resource.Loading -> {
+
+                                        }
+                                        is Resource.Success -> {
+                                            Intent(context, LocationService::class.java).apply {
+                                                action = LocationService.ACTION_START
+                                                context.startService(this)
+                                            }
+                                            navController.popBackStack()
+                                        }
+                                    }
                                 }
-                                navController.popBackStack()
                             }
 
                         reservation.started && !reservation.completed ->

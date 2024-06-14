@@ -7,11 +7,13 @@ import com.filiptoprek.wuff.domain.model.profile.Transaction
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.repository.reload.ReloadRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
 class ReloadRepositoryImpl @Inject constructor(
-    private val firebaseFirestore: FirebaseFirestore,
+    private val firebaseFirestore: FirebaseFirestore
 ) :ReloadRepository {
     override suspend fun reloadBalance(reload: Reload): Resource<Unit> {
         return try {
