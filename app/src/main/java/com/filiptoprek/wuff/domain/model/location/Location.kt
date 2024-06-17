@@ -5,7 +5,7 @@ import kotlin.math.*
 data class Location(
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
-    val userId: String = ""
+    var userId: String = ""
 ){
     private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val earthRadius = 6371000.0 // Radius of the Earth in meters
@@ -31,3 +31,7 @@ data class Location(
     }
 }
 
+data class LocationPoint(
+    val location: Location = Location(),
+    val reservationId: String = "",
+)

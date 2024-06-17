@@ -1,5 +1,6 @@
 package com.filiptoprek.wuff.presentation.home
 
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -25,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -54,6 +57,7 @@ import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
 import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
+import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -75,6 +79,10 @@ fun HomeScreen(
     var isLoading by remember { mutableStateOf(false) }
     var reserved by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        locationViewModel.getLocationOnStart()
+    }
+
     homeFlow.value?.let {
         when(it){
             is Resource.Failure -> {
@@ -84,7 +92,6 @@ fun HomeScreen(
                 isLoading = true
             }
             is Resource.Success -> {
-                locationViewModel.getLocationOnStart()
                 isLoading = false
             }
         }

@@ -82,10 +82,12 @@ class AuthViewModel @Inject constructor(
     }
 
     suspend fun logout(){
-        authRepository.logout()
-        googleSignInClient.signOut().await()
-        _loginFlow.value = null
-        _registerFlow.value = null
+        viewModelScope.launch {
+            authRepository.logout()
+            googleSignInClient.signOut().await()
+            _loginFlow.value = null
+            _registerFlow.value = null
+        }
     }
 
     fun signInWithGoogle(task: Task<GoogleSignInAccount>, scope: CoroutineScope) {

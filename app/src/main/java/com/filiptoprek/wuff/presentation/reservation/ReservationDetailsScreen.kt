@@ -1,6 +1,8 @@
 package com.filiptoprek.wuff.presentation.reservation
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -62,6 +64,8 @@ fun ReservationDetailsScreen(
     sharedViewModel: SharedViewModel
 )
 {
+    val context = LocalContext.current
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
     val walkFlow = reservationViewModel.walkFlow.collectAsState()
     Column(
         modifier = Modifier
@@ -258,8 +262,7 @@ fun ReservationDetailsScreen(
                         )
 
                     reservation.completed && authViewModel.currentUser?.uid == reservation.userId -> {
-                        if(reservation.timeWalkEnded != reservation.timeWalkStarted)
-                        {
+                        if(reservation.timeWalkEnded != reservation.timeWalkStarted) {
                             Text(
                                 text = "Trajanje šetnje",
                                 style = TextStyle(
@@ -271,7 +274,8 @@ fun ReservationDetailsScreen(
                                 )
                             )
 
-                            val timeDiffMillis = reservation.timeWalkEnded.toDate().time - reservation.timeWalkStarted.toDate().time
+                            val timeDiffMillis =
+                                reservation.timeWalkEnded.toDate().time - reservation.timeWalkStarted.toDate().time
                             val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiffMillis)
                             val seconds = TimeUnit.MILLISECONDS.toSeconds(timeDiffMillis) % 60
                             Text(
@@ -286,6 +290,29 @@ fun ReservationDetailsScreen(
                             )
                             Spacer(modifier = Modifier.size(10.dp))
                         }
+                        if(reservation.distance != 0.0)
+                        {
+                            Text(
+                                text = "Duljina šetnje",
+                                style = TextStyle(
+                                    fontFamily = Opensans,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    textAlign = TextAlign.Center,
+                                    color = colorResource(R.color.gray)
+                                )
+                            )
+                            Text(
+                                text = "${reservation.distance} km",
+                                style = TextStyle(
+                                    fontFamily = fontFamily,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Thin,
+                                    textAlign = TextAlign.Center,
+                                    color = colorResource(R.color.gray)
+                                )
+                            )
+                        }
                         ReservationText("Šetnja je završena", colorResource(R.color.green_accent))
                         if (!reservation.rated) {
                             ActionButton("Ocijenite šetnju", colorResource(R.color.green_accent)) {
@@ -293,11 +320,27 @@ fun ReservationDetailsScreen(
                                 navController.navigate(Routes.RateWalker.route)
                             }
                         }
+                        ActionButton("Pregled šetnje", colorResource(R.color.green_accent)) {
+                            sharedViewModel.selectedReservation = reservation
+                            navController.navigate(Routes.LocationPath.route)
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.size(10.dp))
 
-                val context = LocalContext.current
+
+                walkFlow.value?.let {
+                    when(it){
+                        is Resource.Failure -> {
+                            Toast.makeText(context, "Šetnju samo možete započeti ili završiti u blizini korisnika.", Toast.LENGTH_LONG).show()
+                        }
+                        Resource.Loading -> {
+
+                        }
+                        is Resource.Success -> {
+                        }
+                    }
+                }
 
                 if (authViewModel.currentUser?.uid == reservation.walkerUserId) {
                     when {
@@ -310,34 +353,52 @@ fun ReservationDetailsScreen(
                         reservation.accepted && !reservation.completed && !reservation.started ->
                             ActionButton("Započni šetnju", colorResource(R.color.green_accent)) {
                                 reservationViewModel.startWalk(reservation)
-
                                 walkFlow.value?.let {
                                     when(it){
                                         is Resource.Failure -> {
-                                            Toast.makeText(context, "Šetnju samo možete započeti u blizini korisnika.", Toast.LENGTH_LONG).show()
                                         }
                                         Resource.Loading -> {
 
                                         }
                                         is Resource.Success -> {
+                                            with(sharedPreferences.edit()) {
+                                                putBoolean("isWalking", true)
+                                                apply()
+                                            }
+
                                             Intent(context, LocationService::class.java).apply {
                                                 action = LocationService.ACTION_START
+                                                context.startService(this)
+                                            }
+                                        }
+                                    }
+                                }
+                                navController.popBackStack()
+                            }
+
+                        reservation.started && !reservation.completed ->
+                            ActionButton("Završi šetnju", Color.Red) {
+                                reservationViewModel.endWalk(reservation)
+                                walkFlow.value?.let {
+                                    when(it){
+                                        is Resource.Failure -> {
+                                        }
+                                        Resource.Loading -> {
+
+                                        }
+                                        is Resource.Success -> {
+                                            with(sharedPreferences.edit()) {
+                                                putBoolean("isWalking", false)
+                                                apply()
+                                            }
+                                            Intent(context, LocationService::class.java).apply {
+                                                action = LocationService.ACTION_STOP
                                                 context.startService(this)
                                             }
                                             navController.popBackStack()
                                         }
                                     }
                                 }
-                            }
-
-                        reservation.started && !reservation.completed ->
-                            ActionButton("Završi šetnju", Color.Red) {
-                                reservationViewModel.endWalk(reservation)
-                                Intent(context, LocationService::class.java).apply {
-                                    action = LocationService.ACTION_STOP
-                                    context.startService(this)
-                                }
-                                navController.popBackStack()
                             }
                     }
                 }

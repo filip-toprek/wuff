@@ -34,6 +34,7 @@ import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.presentation.withdraw.WithdrawViewModel
+import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.WuffTheme
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.GoogleMap
@@ -97,6 +98,15 @@ class MainActivity : ComponentActivity() {
         for (listener in reservationListeners.values) {
             listener.remove()
         }
+        val sharedPreferences: SharedPreferences = getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
+        val isWalking = sharedPreferences.getBoolean("isWalking", false)
+        if(!isWalking || profileViewModel.userProfile?.walker?.approved == false)
+        {
+            Intent(this@MainActivity, LocationService::class.java).apply {
+                action = LocationService.ACTION_STOP
+                this@MainActivity.startService(this)
+            }
+        }
     }
 
     private fun listenForReservationChanges(reservationId: String) {
@@ -108,8 +118,7 @@ class MainActivity : ComponentActivity() {
                 return@addSnapshotListener
             }
 
-            val sharedPreferences: SharedPreferences = this.getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
-
+            val sharedPreferences: SharedPreferences = getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
 
             if (snapshot != null && snapshot.exists()) {
                 val reservation: Reservation = snapshot.toObject(Reservation::class.java)!!
@@ -172,6 +181,7 @@ class MainActivity : ComponentActivity() {
             }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         ActivityCompat.requestPermissions(
             this,
@@ -201,6 +211,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
             )
+        }
+
+        Intent(applicationContext, LocationService::class.java).apply {
+            action = LocationService.ACTION_START
+            applicationContext.startService(this)
         }
     }
 }

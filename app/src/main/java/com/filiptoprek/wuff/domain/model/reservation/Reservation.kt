@@ -22,5 +22,6 @@ data class Reservation (
     var user: UserProfile? = null,
     var rated: Boolean = false,
     val timeWalkStarted: Timestamp = Timestamp.now(),
-    val timeWalkEnded: Timestamp = Timestamp.now()
+    val timeWalkEnded: Timestamp = Timestamp.now(),
+    val distance: Double = 0.0
 )

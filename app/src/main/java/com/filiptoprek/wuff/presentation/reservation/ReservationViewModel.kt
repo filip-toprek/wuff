@@ -1,5 +1,6 @@
 package com.filiptoprek.wuff.presentation.reservation
 
+import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,7 +21,10 @@ import com.filiptoprek.wuff.domain.repository.profile.ProfileRepository
 import com.filiptoprek.wuff.domain.repository.reservation.ReservationRepository
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
 import com.filiptoprek.wuff.navigation.Routes
+import com.filiptoprek.wuff.service.LocationService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -91,9 +95,8 @@ class ReservationViewModel @Inject constructor(
                 reservation.userId = authRepository.currentUser?.uid.toString()
                 val result = reservationRepository.createReservation(reservation)
 
-                getReservationsList()
                 _reservationCreateFlow.value = result
-                delayBeforeReset()
+                getReservationsList()
             }
         }else
         {
@@ -130,6 +133,7 @@ class ReservationViewModel @Inject constructor(
                 _reservationsList.value = result
                 _reservationFlow.value = Resource.Success(result)
             }
+            delayBeforeReset()
         }
     }
 
@@ -164,9 +168,18 @@ class ReservationViewModel @Inject constructor(
 
     fun endWalk(reservation: Reservation) {
         viewModelScope.launch {
-            _reservationFlow.value = Resource.Loading
-            val result = reservationRepository.endWalk(reservation)
-            _reservationFlow.value = result
+            _walkFlow.value = Resource.Loading
+            val walkerLocation = locationRepository.getLocation(reservation.walkerUserId)
+            val userLocation = locationRepository.getLocation(reservation.userId)
+            val result =
+                if(walkerLocation.isWithinProximity(walkerLocation, userLocation, 100.0))
+                {
+                    reservationRepository.endWalk(reservation)
+                }else
+                {
+                    Resource.Failure(Exception("Error"))
+                }
+            _walkFlow.value = result
             _reservationsList.value = emptyList<Reservation>()
             getReservationsList()
         }

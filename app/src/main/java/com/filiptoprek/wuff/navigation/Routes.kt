@@ -15,4 +15,5 @@ sealed class Routes(val route: String) {
     object TrackLocation : Routes("LocationScreen")
     object Withdrawals : Routes("WithdrawalsScreen")
     object CreateWithdraw : Routes("WithdrawRequestScreen")
+    object LocationPath : Routes("LocationPathScreen")
 }

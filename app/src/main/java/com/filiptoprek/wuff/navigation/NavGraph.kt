@@ -52,6 +52,7 @@ import com.filiptoprek.wuff.presentation.auth.RegisterScreen
 import com.filiptoprek.wuff.domain.model.core.BottomNavigationItem
 import com.filiptoprek.wuff.presentation.home.HomeScreen
 import com.filiptoprek.wuff.presentation.home.HomeViewModel
+import com.filiptoprek.wuff.presentation.location.LocationPathScreen
 import com.filiptoprek.wuff.presentation.location.LocationScreen
 import com.filiptoprek.wuff.presentation.location.LocationViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
@@ -265,6 +266,11 @@ fun SetupNavGraph(
                 route = Routes.CreateWithdraw.route
             ){
                 WithdrawRequestScreen(navController, withdrawViewModel)
+            }
+            composable(
+                route = Routes.LocationPath.route
+            ){
+                LocationPathScreen(locationViewModel, sharedViewModel)
             }
         }
     }

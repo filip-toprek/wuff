@@ -14,4 +14,6 @@ interface ReservationRepository {
     suspend fun startWalk(reservationId: String): Resource<Unit>
     suspend fun endWalk(reservation: Reservation): Resource<Unit>
     suspend fun deleteReservation(reservation: Reservation): Resource<Unit>
+    suspend fun getStartedReservationByWalkerId(walkerId: String): Reservation
+    suspend fun updateWalkDistance(reservationId: String, distance: Double)
 }

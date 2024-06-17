@@ -180,4 +180,29 @@ class ReservationRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override suspend fun getStartedReservationByWalkerId(walkerId: String): Reservation {
+        return try {
+            val snapshot = firebaseFirestore.collection("reservations")
+                .whereEqualTo("walkerUserId", walkerId)
+                .whereEqualTo("started", true)
+                .whereEqualTo("completed", false)
+                .get()
+                .await()
+            val result = snapshot.documents.firstOrNull()?.toObject(Reservation::class.java)!!
+            result.reservationId = snapshot.documents.firstOrNull()?.id.toString()
+            result
+        } catch (e: Exception) {
+            Reservation()
+        }
+    }
+
+    override suspend fun updateWalkDistance(reservationId: String, distance: Double) {
+        try {
+            firebaseFirestore.collection("reservations").document(reservationId)
+                .update("distance", distance).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

@@ -39,9 +39,7 @@ class ProfileViewModel @Inject constructor(
     private fun observeCurrentUser() {
         authRepository.currentUserLiveData.observeForever { currentUser ->
             if (currentUser != null) {
-                viewModelScope.launch {
                     loadUserProfile()
-                }
             }
         }
     }
