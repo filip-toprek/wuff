@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -25,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -55,6 +57,7 @@ import androidx.navigation.compose.rememberNavController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -118,21 +121,22 @@ fun LoginScreen(
                 .wrapContentWidth(Alignment.CenterHorizontally),
             text = "Wuff!",
             style = TextStyle(
-                fontFamily = Pattaya,
-                fontSize = 135.sp,
-                lineHeight = 27.sp,
+                fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                textAlign = MaterialTheme.typography.titleLarge.textAlign,
                 color = Color.White
-            )
+            ),
         )
+        Spacer(modifier = Modifier.size(AppTheme.dimens.customSpacing))
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(top = 80.dp),
+                .wrapContentWidth(Alignment.CenterHorizontally) ,
             text = if(errorText.contains("|")) errorText.split("|")[1] else "",
             style = TextStyle(
                 fontFamily = Opensans,
-                fontSize = 15.sp,
+                fontSize = MaterialTheme.typography.bodySmall.fontSize,
                 lineHeight = 5.sp,
                 color = Color.Red
             )
@@ -144,7 +148,12 @@ fun LoginScreen(
                 .padding(top = 80.dp),
             value = emailText,
             onValueChange = { emailText = it },
-            label = { Text("Email", color = Color(parseColor("#333333"))) },
+            textStyle = MaterialTheme.typography.labelSmall,
+            label = {
+                Text("Email",
+                    color = Color(parseColor("#333333")),
+                    style = MaterialTheme.typography.bodySmall
+                ) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
                 unfocusedTextColor = Color(parseColor("#333333")),
@@ -159,6 +168,7 @@ fun LoginScreen(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Molimo unesite vašu email adresu",
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Red
                     )
                 }
@@ -168,12 +178,16 @@ fun LoginScreen(
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(top = 10.dp),
+                .wrapContentWidth(Alignment.CenterHorizontally),
             value = passwordText,
             onValueChange = { passwordText = it },
+            textStyle = MaterialTheme.typography.labelSmall,
             visualTransformation = PasswordVisualTransformation(),
-            label = { Text("Lozinka", color = Color(parseColor("#333333"))) },
+            label = {
+                Text("Lozinka",
+                    color = Color(parseColor("#333333")),
+                    style = MaterialTheme.typography.bodySmall
+                ) },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
                 unfocusedTextColor = Color(parseColor("#333333")),
@@ -188,6 +202,7 @@ fun LoginScreen(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Molimo unesite lozinku",
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Red
                     )
                 }
@@ -224,7 +239,7 @@ fun LoginScreen(
         Button(modifier = Modifier
             .fillMaxWidth()
             .wrapContentWidth(Alignment.CenterHorizontally)
-            .padding(top = 35.dp),
+            .padding(AppTheme.dimens.largeText),
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(parseColor("#52B788"))),
             onClick = {
@@ -237,12 +252,12 @@ fun LoginScreen(
                 modifier = Modifier.padding(5.dp),
                 text = "Prijavi se",
                 style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                    fontFamily = MaterialTheme.typography.displayMedium.fontFamily,
+                    fontSize = MaterialTheme.typography.displayMedium.fontSize,
+                    fontWeight = MaterialTheme.typography.displayMedium.fontWeight,
+                    textAlign = MaterialTheme.typography.displayMedium.textAlign,
                     color = Color.White
-                )
+                ),
             )
         }
 
@@ -255,26 +270,26 @@ fun LoginScreen(
         Row(modifier = Modifier
             .fillMaxWidth()
             .wrapContentWidth(Alignment.CenterHorizontally)
-            .padding(top = 35.dp)){
+            .padding(AppTheme.dimens.mediumLarge)){
             Text(
                 modifier = Modifier.padding(5.dp),
                 text = "Još nemaš Wuff! račun?",
                 style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center,
+                    fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontWeight = MaterialTheme.typography.bodySmall.fontWeight,
+                    textAlign = MaterialTheme.typography.bodySmall.textAlign,
                     color = Color.White
-                )
+                ),
             )
             ClickableText(
                 modifier = Modifier.padding(5.dp),
                 text = AnnotatedString("Registriraj se"),
                 style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                    fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontWeight = MaterialTheme.typography.bodySmall.fontWeight,
+                    textAlign = MaterialTheme.typography.bodySmall.textAlign,
                     color = Color(parseColor("#52B788"))
                 ),
                 onClick = {
@@ -298,7 +313,7 @@ fun GoogleSignInButton(text: String = "Prijavi", onClick: () -> Unit) {
     ) {
         Icon(
             ImageVector.vectorResource(id = R.drawable.ic_google_logo),
-            contentDescription = "$text se sa Google računom"
+            contentDescription = "$text se sa Google računom",
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text("$text se sa Google računom", color = Color.White)

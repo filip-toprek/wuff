@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +51,7 @@ import com.filiptoprek.wuff.presentation.auth.AuthViewModel
 import com.filiptoprek.wuff.presentation.location.LocationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.service.LocationService
+import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import java.util.concurrent.TimeUnit
@@ -89,12 +92,11 @@ fun ReservationDetailsScreen(
                 )
             )
         }
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentWidth()
-                .padding(15.dp)
                 .height(IntrinsicSize.Min)
         ) {
             Column(
@@ -108,8 +110,7 @@ fun ReservationDetailsScreen(
                     text = "Detalji rezervacije",
                     style = TextStyle(
                         fontFamily = Opensans,
-                        fontSize = 23.sp,
-                        lineHeight = 20.sp,
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                     ),
@@ -124,7 +125,7 @@ fun ReservationDetailsScreen(
                             colorResource(R.color.gray),
                             shape = RoundedCornerShape(90.dp)
                         )
-                        .size(100.dp),
+                        .size(AppTheme.dimens.smallImage),
                     model = if (authViewModel.currentUser?.uid == reservation.walkerUserId) {
                         reservation.user?.user?.profilePhotoUrl
                     } else {
@@ -134,7 +135,7 @@ fun ReservationDetailsScreen(
                     error = painterResource(id = R.drawable.user_placeholder),
                     contentDescription = "User image",
                 )
-                Spacer(modifier = Modifier.size(15.dp))
+                Spacer(modifier = Modifier.size(AppTheme.dimens.smallMedium))
                 val fontFamily = FontFamily(Font(
                     R.font.opensans_variable, variationSettings = FontVariation.Settings(
                         FontVariation.weight(100)
@@ -148,185 +149,23 @@ fun ReservationDetailsScreen(
                     },
                     style = TextStyle(
                         fontFamily = Opensans,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                        fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
                         color = colorResource(R.color.background_dark)
                     )
                 )
-                Spacer(modifier = Modifier.size(20.dp))
-                Text(
-                    text = "Tip šetnje",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Text(
-                    text = reservation.walkType.walkName,
-                    style = TextStyle(
-                        fontFamily = fontFamily,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Thin,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    text = "Datum šetnje",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Text(
-                    text = "${reservation.dateOfWalk}",
-                    style = TextStyle(
-                        fontFamily = fontFamily,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Thin,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    text = "Vrijeme šetnje",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Text(
-                    text = "${reservation.timeOfWalk}",
-                    style = TextStyle(
-                        fontFamily = fontFamily,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Thin,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    text = "Cijena šetnje",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Text(
-                    text = "${reservation.price} €",
-                    style = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        color = colorResource(R.color.gray)
-                    )
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                when {
-                    reservation.declined && authViewModel.currentUser?.uid == reservation.userId ->
-                        ReservationText("Rezervacija je odbijena", Color.Red)
+                Spacer(modifier = Modifier.size(AppTheme.dimens.medium))
 
-                    reservation.started && !reservation.completed && authViewModel.currentUser?.uid == reservation.userId -> {
-                        ReservationText("Šetnja u tijeku", colorResource(R.color.green_accent))
-                        if(authViewModel.currentUser?.uid != reservation.walkerUserId)
-                        {
-                            ActionButton("Pratite šetača", colorResource(R.color.green_accent)) {
-                                locationViewModel.startLocationUpdates(sharedViewModel.selectedReservation?.walker!!)
-                                navController.navigate(Routes.TrackLocation.route)
-                            }
-                        }
-                    }
-
-
-                    !reservation.completed ->
-                        ReservationText(
-                            if (reservation.accepted) "Rezervacija je prihvaćena" else "Rezervacija nije još prihvaćena",
-                            if (reservation.accepted) colorResource(R.color.green_accent) else Color.Red
-                        )
-
-                    reservation.completed && authViewModel.currentUser?.uid == reservation.userId -> {
-                        if(reservation.timeWalkEnded != reservation.timeWalkStarted) {
-                            Text(
-                                text = "Trajanje šetnje",
-                                style = TextStyle(
-                                    fontFamily = Opensans,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    textAlign = TextAlign.Center,
-                                    color = colorResource(R.color.gray)
-                                )
-                            )
-
-                            val timeDiffMillis =
-                                reservation.timeWalkEnded.toDate().time - reservation.timeWalkStarted.toDate().time
-                            val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiffMillis)
-                            val seconds = TimeUnit.MILLISECONDS.toSeconds(timeDiffMillis) % 60
-                            Text(
-                                text = "${minutes} minuta i ${seconds} sekundi",
-                                style = TextStyle(
-                                    fontFamily = fontFamily,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Thin,
-                                    textAlign = TextAlign.Center,
-                                    color = colorResource(R.color.gray)
-                                )
-                            )
-                            Spacer(modifier = Modifier.size(10.dp))
-                        }
-                        if(reservation.distance != 0.0)
-                        {
-                            Text(
-                                text = "Duljina šetnje",
-                                style = TextStyle(
-                                    fontFamily = Opensans,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    textAlign = TextAlign.Center,
-                                    color = colorResource(R.color.gray)
-                                )
-                            )
-                            Text(
-                                text = "${reservation.distance} km",
-                                style = TextStyle(
-                                    fontFamily = fontFamily,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Thin,
-                                    textAlign = TextAlign.Center,
-                                    color = colorResource(R.color.gray)
-                                )
-                            )
-                        }
-                        ReservationText("Šetnja je završena", colorResource(R.color.green_accent))
-                        if (!reservation.rated) {
-                            ActionButton("Ocijenite šetnju", colorResource(R.color.green_accent)) {
-                                sharedViewModel.reservationToRate = reservation
-                                navController.navigate(Routes.RateWalker.route)
-                            }
-                        }
-                        ActionButton("Pregled šetnje", colorResource(R.color.green_accent)) {
-                            sharedViewModel.selectedReservation = reservation
-                            navController.navigate(Routes.LocationPath.route)
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.size(10.dp))
+                walkDetails(
+                    reservation,
+                    fontFamily,
+                    authViewModel,
+                    locationViewModel,
+                    sharedViewModel,
+                    navController
+                )
+                Spacer(modifier = Modifier.size(AppTheme.dimens.smallMedium))
 
 
                 walkFlow.value?.let {
@@ -419,6 +258,228 @@ fun ReservationDetailsScreen(
                 ActionButton("Natrag", colorResource(R.color.green_accent)) {
                     navController.popBackStack()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun walkDetails(
+    reservation: Reservation,
+    fontFamily: FontFamily,
+    authViewModel: AuthViewModel,
+    locationViewModel: LocationViewModel,
+    sharedViewModel: SharedViewModel,
+    navController: NavHostController
+) {
+    Row{
+        Column(
+            modifier = Modifier
+                .wrapContentWidth(Alignment.CenterHorizontally)
+                .wrapContentHeight(Alignment.Top),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Datum šetnje",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+            Text(
+                text = "${reservation.dateOfWalk}",
+                style = TextStyle(
+                    fontFamily = fontFamily,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Thin,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+            Spacer(modifier = Modifier.size(AppTheme.dimens.largeText))
+            Text(
+                text = "Tip šetnje",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+            Text(
+                text = reservation.walkType.walkName,
+                style = TextStyle(
+                    fontFamily = fontFamily,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Thin,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+        }
+        Spacer(modifier = Modifier.size(AppTheme.dimens.largeText))
+        Column(
+            modifier = Modifier
+                .wrapContentWidth(Alignment.CenterHorizontally)
+                .wrapContentHeight(Alignment.Top),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Vrijeme šetnje",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+            Text(
+                text = "${reservation.timeOfWalk}",
+                style = TextStyle(
+                    fontFamily = fontFamily,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Thin,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+            Spacer(modifier = Modifier.size(AppTheme.dimens.largeText))
+
+            Text(
+                text = "Cijena šetnje",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+            Text(
+                text = "${reservation.price} €",
+                style = TextStyle(
+                    fontFamily = fontFamily,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Thin,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray)
+                )
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.size(AppTheme.dimens.largeText))
+    when {
+        reservation.declined && authViewModel.currentUser?.uid == reservation.userId ->
+            ReservationText("Rezervacija je odbijena", Color.Red)
+
+        reservation.started && !reservation.completed && authViewModel.currentUser?.uid == reservation.userId -> {
+            ReservationText("Šetnja u tijeku", colorResource(R.color.green_accent))
+            if(authViewModel.currentUser?.uid != reservation.walkerUserId)
+            {
+                ActionButton("Pratite šetača", colorResource(R.color.green_accent)) {
+                    locationViewModel.startLocationUpdates(sharedViewModel.selectedReservation?.walker!!)
+                    navController.navigate(Routes.TrackLocation.route)
+                }
+            }
+        }
+
+
+        !reservation.completed ->
+            ReservationText(
+                if (reservation.accepted) "Rezervacija je prihvaćena" else "Rezervacija nije još prihvaćena",
+                if (reservation.accepted) colorResource(R.color.green_accent) else Color.Red
+            )
+
+        reservation.completed && authViewModel.currentUser?.uid == reservation.userId -> {
+            Row {
+                Column(
+                    modifier = Modifier
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                        .wrapContentHeight(Alignment.Top),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    if(reservation.timeWalkEnded != reservation.timeWalkStarted) {
+                        Text(
+                            text = "Trajanje šetnje",
+                            style = TextStyle(
+                                fontFamily = Opensans,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Normal,
+                                textAlign = TextAlign.Center,
+                                color = colorResource(R.color.gray)
+                            )
+                        )
+
+                        val timeDiffMillis =
+                            reservation.timeWalkEnded.toDate().time - reservation.timeWalkStarted.toDate().time
+                        val minutes = TimeUnit.MILLISECONDS.toMinutes(timeDiffMillis)
+                        val seconds = TimeUnit.MILLISECONDS.toSeconds(timeDiffMillis) % 60
+                        Text(
+                            text = "${minutes} minuta i ${seconds} sekundi",
+                            style = TextStyle(
+                                fontFamily = fontFamily,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Thin,
+                                textAlign = TextAlign.Center,
+                                color = colorResource(R.color.gray)
+                            )
+                        )
+                        Spacer(modifier = Modifier.size(AppTheme.dimens.small))
+                    }
+                }
+                Spacer(modifier = Modifier.size(AppTheme.dimens.largeText))
+                Column(
+                    modifier = Modifier
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                        .wrapContentHeight(Alignment.Top),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    if(reservation.distance != 0.0)
+                    {
+                        Text(
+                            text = "Duljina šetnje",
+                            style = TextStyle(
+                                fontFamily = Opensans,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Normal,
+                                textAlign = TextAlign.Center,
+                                color = colorResource(R.color.gray)
+                            )
+                        )
+                        Text(
+                            text = "${reservation.distance} km",
+                            style = TextStyle(
+                                fontFamily = fontFamily,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Thin,
+                                textAlign = TextAlign.Center,
+                                color = colorResource(R.color.gray)
+                            )
+                        )
+                    }
+                }
+            }
+
+            ReservationText("Šetnja je završena", colorResource(R.color.green_accent))
+            if (!reservation.rated) {
+                ActionButton("Ocijenite šetnju", colorResource(R.color.green_accent)) {
+                    sharedViewModel.reservationToRate = reservation
+                    navController.navigate(Routes.RateWalker.route)
+                }
+            }
+            ActionButton("Pregled šetnje", colorResource(R.color.green_accent)) {
+                sharedViewModel.selectedReservation = reservation
+                navController.navigate(Routes.LocationPath.route)
             }
         }
     }

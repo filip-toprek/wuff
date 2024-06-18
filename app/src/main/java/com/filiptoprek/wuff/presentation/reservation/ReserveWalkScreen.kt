@@ -2,7 +2,6 @@ package com.filiptoprek.wuff.presentation.reservation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,10 +21,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,13 +44,10 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
-import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
-import com.filiptoprek.wuff.domain.model.reservation.WalkType
 import com.filiptoprek.wuff.navigation.Routes
-import com.filiptoprek.wuff.presentation.home.dateTimePickers
-import com.filiptoprek.wuff.presentation.home.dropDownMenu
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
+import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 
@@ -99,12 +94,11 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
             )
         }
 
-        Spacer(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentWidth()
-                .padding(15.dp)
                 .height(IntrinsicSize.Min)
         ) {
             Column(
@@ -118,15 +112,14 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
                     text = "Rezerviraj šetnju",
                     style = TextStyle(
                         fontFamily = Opensans,
-                        fontSize = 23.sp,
-                        lineHeight = 20.sp,
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                     ),
                     color = colorResource(R.color.gray)
 
                 )
-                Spacer(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.size(AppTheme.dimens.medium))
                 AsyncImage(
                     modifier = Modifier
                         .clip(RoundedCornerShape(90.dp))
@@ -135,30 +128,30 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
                             colorResource(R.color.gray),
                             shape = RoundedCornerShape(90.dp)
                         )
-                        .size(100.dp),
+                        .size(AppTheme.dimens.smallImage),
                     model = sharedViewModel.selectedWalker?.user?.profilePhotoUrl,
                     placeholder = painterResource(id = R.drawable.user_placeholder),
                     error = painterResource(id = R.drawable.user_placeholder),
                     contentDescription = "User image",
                 )
-                Spacer(modifier = Modifier.size(15.dp))
+                Spacer(modifier = Modifier.size(AppTheme.dimens.smallMedium))
                 Text(
                     text = sharedViewModel.selectedWalker?.user?.name.toString(),
                     style = TextStyle(
                         fontFamily = Opensans,
-                        fontSize = 18.sp,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         color = colorResource(R.color.gray)
                     )
                 )
-                Spacer(modifier = Modifier.size(10.dp))
+                Spacer(modifier = Modifier.size(AppTheme.dimens.small))
                 if (isError){
                     Text(
                         text = errorText,
                         style = TextStyle(
                             fontFamily = Opensans,
-                            fontSize = 15.sp,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             color = Color.Red
@@ -169,7 +162,7 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
 
                 dateTimePickers(dateString, timeString)
 
-                Spacer(modifier = Modifier.size(10.dp))
+                Spacer(modifier = Modifier.size(AppTheme.dimens.smallMedium))
                 Text(
                     text = if (selectedText.value != "Odaberite vrstu šetnje") {
                         "${walkTypeList.value.find { it?.walkName == selectedText.value }?.walkPrice}€"

@@ -121,6 +121,12 @@ fun LocationPathScreen(locationViewModel: LocationViewModel, sharedViewModel: Sh
         locationViewModel.fetchLocationPoints(sharedViewModel.selectedReservation?.walkerUserId.toString(), sharedViewModel.selectedReservation?.reservationId.toString())
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            locationViewModel.clearLocationPoints()
+        }
+    }
+
     AndroidView({mapView}){ map ->
         coroutineScope.launch {
             map.getMapAsync { googleMap ->
@@ -136,7 +142,7 @@ fun drawPathOnMap(googleMap: GoogleMap, locationPoints: List<Location>, pathColo
     locationPoints as List<HashMap<String, Double>>
         val polylineOptions = PolylineOptions()
             .color(pathColor)
-            .width(5f)
+            .width(7f)
             .geodesic(true)
 
         // Add each location point to the polyline
@@ -158,7 +164,7 @@ fun drawPathOnMap(googleMap: GoogleMap, locationPoints: List<Location>, pathColo
                 .target(LatLng(latitude, longitude))
                 .zoom(15f)
                 .build()
-            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 750, null)
         }
         locationViewModel.calculatePolylineDistance(polylineOptions.points, sharedViewModel.selectedReservation?.reservationId.toString())
     }

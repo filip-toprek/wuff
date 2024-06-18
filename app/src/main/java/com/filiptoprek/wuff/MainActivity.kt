@@ -35,7 +35,9 @@ import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.presentation.withdraw.WithdrawViewModel
 import com.filiptoprek.wuff.service.LocationService
+import com.filiptoprek.wuff.ui.theme.WindowSizeClass
 import com.filiptoprek.wuff.ui.theme.WuffTheme
+import com.filiptoprek.wuff.ui.theme.WuffThemeResponsive
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.maps.GoogleMap
 import com.google.firebase.auth.FirebaseAuth
@@ -195,7 +197,7 @@ class MainActivity : ComponentActivity() {
 
         fetchUserReservations()
         setContent {
-            WuffTheme(authViewModel = authViewModel,
+            WuffThemeResponsive(authViewModel = authViewModel,
                 content = {
                 SetupNavGraph(
                     viewModel = authViewModel,

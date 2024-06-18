@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -56,6 +57,7 @@ import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.profile.Walker
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
+import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -147,7 +149,7 @@ fun userProfile(
                 )
             )
         }
-        Spacer(modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
         if(isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -174,7 +176,7 @@ fun userProfile(
                                 colorResource(R.color.gray),
                                 shape = RoundedCornerShape(90.dp)
                             )
-                            .size(100.dp),
+                            .size(AppTheme.dimens.smallImage),
                         model = viewModel?.currentUser?.photoUrl,
                         placeholder = painterResource(id = R.drawable.user_placeholder),
                         error = painterResource(id = R.drawable.user_placeholder),
@@ -580,17 +582,13 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                 TextField(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     value = phoneNumber,
-                    textStyle = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Start,
-                        color = colorResource(R.color.gray),
-                    ),
+                    textStyle = MaterialTheme.typography.labelSmall,
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
                     ),
-                    label = { Text("Broj mobitela", color = colorResource(R.color.gray)) },
+                    label = { Text("Broj mobitela",
+                        color = colorResource(R.color.gray),
+                        style = MaterialTheme.typography.bodySmall) },
                     supportingText = {
 
                     },
@@ -612,14 +610,10 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                 TextField(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     value = address,
-                    textStyle = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Start,
+                    textStyle = MaterialTheme.typography.labelSmall,
+                    label = { Text("Adresa i broj",
                         color = colorResource(R.color.gray),
-                    ),
-                    label = { Text("Adresa i broj", color = colorResource(R.color.gray)) },
+                        style = MaterialTheme.typography.bodySmall) },
                     supportingText = {
                         /*if (isError) {
                             Text(
@@ -645,15 +639,11 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                 TextField(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     value = city,
-                    textStyle = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Start,
-                        color = colorResource(R.color.gray),
-                    ),
+                    textStyle = MaterialTheme.typography.labelSmall,
                     singleLine = true,
-                    label = { Text("Grad", color = colorResource(R.color.gray)) },
+                    label = { Text("Grad",
+                        color = colorResource(R.color.gray),
+                        style = MaterialTheme.typography.bodySmall) },
                     supportingText = {
                         /*if (isError) {
                             Text(
@@ -678,17 +668,14 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                 TextField(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     value = zipCode,
-                    textStyle = TextStyle(
-                        fontFamily = Opensans,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Start,
-                        color = colorResource(R.color.gray),
-                    ),
+                    textStyle = MaterialTheme.typography.labelSmall,
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
                     ),
-                    label = { Text("Poštanski broj", color = colorResource(R.color.gray)) },
+                    label = { Text("Poštanski broj",
+                        color = colorResource(R.color.gray),
+                        style = MaterialTheme.typography.bodySmall
+                    ) },
                     supportingText = {
                         /*if (isError) {
                             Text(
@@ -712,7 +699,7 @@ fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Un
                         focusedIndicatorColor =  Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent),
                 )
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
             Button(modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentWidth(Alignment.CenterHorizontally)

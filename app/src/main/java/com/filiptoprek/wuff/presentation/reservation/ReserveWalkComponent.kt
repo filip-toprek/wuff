@@ -1,4 +1,4 @@
-package com.filiptoprek.wuff.presentation.home
+package com.filiptoprek.wuff.presentation.reservation
 
 import android.os.Build
 import android.widget.Toast
@@ -67,7 +67,7 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.reservation.WalkType
-import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
+import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import java.util.Calendar
 
@@ -130,7 +130,7 @@ fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>
                 error = painterResource(id = R.drawable.user_placeholder),
                 contentDescription = "User image",
             )
-            Spacer(modifier = Modifier.size(15.dp))
+            Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
             Text(
                 text = selectedWalker?.user?.name.toString(),
                 style = TextStyle(
@@ -317,13 +317,14 @@ fun dropDownMenu(selectedText: MutableState<String>, walkTypes: List<WalkType?>)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(32.dp),
+            .padding(AppTheme.dimens.mediumLarge),
     ) {
         MaterialTheme(
             colorScheme = MaterialTheme.colorScheme.copy(surface = colorResource(R.color.background_white), surfaceTint = Color.Transparent),
             shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(20))
         ) {
             ExposedDropdownMenuBox(
+                modifier = Modifier.align(Alignment.Center),
                 expanded = expanded,
                 onExpandedChange = {
                     expanded = !expanded
@@ -588,7 +589,7 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
                     dayContentColor = colorResource(R.color.gray),
                     selectedDayContainerColor = colorResource(R.color.box_bkg_white),
                     dividerColor = colorResource(R.color.gray),
-                    containerColor = colorResource(R.color.box_bkg_white),
+                    containerColor = colorResource(R.color.gray),
                     currentYearContentColor = colorResource(R.color.gray),
                     weekdayContentColor = colorResource(R.color.gray),
                     titleContentColor = colorResource(R.color.gray),
@@ -607,7 +608,8 @@ fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<S
                         focusedLabelColor = colorResource(R.color.gray),
                         disabledLabelColor = Color.Transparent,
                         focusedIndicatorColor =  Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent)
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
                 )
             )
         }

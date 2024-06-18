@@ -73,6 +73,11 @@ class LocationViewModel @Inject constructor(
         }
     }
 
+    fun clearLocationPoints()
+    {
+        _locationPoints.value = emptyList()
+    }
+
     private fun distanceBetweenPoints(start: LatLng, end: LatLng): Double {
         val lat1 = start.latitude
         val lon1 = start.longitude

@@ -11,9 +11,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,12 +45,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.domain.model.auth.Resource
+import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -106,20 +111,27 @@ fun RegisterScreen(
                 .wrapContentWidth(Alignment.CenterHorizontally),
             text = "Wuff!",
             style = TextStyle(
-                fontFamily = Pattaya,
-                fontSize = 135.sp,
-                lineHeight = 27.sp,
+                fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                textAlign = MaterialTheme.typography.titleLarge.textAlign,
                 color = Color.White
-            )
+            ),
         )
+        Spacer(modifier = Modifier.size(AppTheme.dimens.customSpacing))
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(top = 80.dp),
+                .wrapContentWidth(Alignment.CenterHorizontally),
             value = nameText,
             onValueChange = { nameText = it },
-            label = { Text("Ime i prezime", color = Color(parseColor("#333333"))) },
+            textStyle = MaterialTheme.typography.labelSmall,
+            label = {
+                Text("Ime i prezime",
+                color = Color(parseColor("#333333")),
+                style = MaterialTheme.typography.bodySmall
+                )
+                    },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
                 unfocusedTextColor = Color(parseColor("#333333")),
@@ -128,13 +140,14 @@ fun RegisterScreen(
                 disabledLabelColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = colorResource(R.color.gray)
+                focusedTextColor = colorResource(R.color.gray),
             ),
             supportingText = {
                 if (errorText == "BAD_NAME") {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Molimo unesite vaše ime i prezime",
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Red
                     )
                 }
@@ -144,11 +157,16 @@ fun RegisterScreen(
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(top = 10.dp),
+                .wrapContentWidth(Alignment.CenterHorizontally),
             value = emailText,
             onValueChange = { emailText = it },
-            label = { Text("Email", color = Color(parseColor("#333333"))) },
+            textStyle = MaterialTheme.typography.labelSmall,
+            label = {
+                Text("Email",
+                    color = Color(parseColor("#333333")),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                    },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
                 unfocusedTextColor = Color(parseColor("#333333")),
@@ -164,6 +182,7 @@ fun RegisterScreen(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Molimo unesite vašu email adresu",
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Red
                     )
                 }
@@ -173,12 +192,17 @@ fun RegisterScreen(
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(top = 10.dp),
+                .wrapContentWidth(Alignment.CenterHorizontally) ,
             value = passwordText,
             onValueChange = { passwordText = it },
+            textStyle = MaterialTheme.typography.labelSmall,
             visualTransformation = PasswordVisualTransformation(),
-            label = { Text("Lozinka", color = Color(parseColor("#333333"))) },
+            label = {
+                Text("Lozinka",
+                    color = Color(parseColor("#333333")),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                    },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
                 unfocusedTextColor = Color(parseColor("#333333")),
@@ -194,6 +218,7 @@ fun RegisterScreen(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Lozinka mora sadržavati 8 znakova i jedan broj",
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Red
                     )
                 }
@@ -203,12 +228,17 @@ fun RegisterScreen(
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(top = 10.dp),
+                .wrapContentWidth(Alignment.CenterHorizontally) ,
             value = verifyPasswordText,
             onValueChange = { verifyPasswordText = it },
             visualTransformation = PasswordVisualTransformation(),
-            label = { Text("Potvrdi lozinku", color = Color(parseColor("#333333"))) },
+            textStyle = MaterialTheme.typography.labelSmall,
+            label = {
+                Text("Potvrdi lozinku",
+                    color = Color(parseColor("#333333")),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                    },
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.textFieldColors(
                 unfocusedTextColor = Color(parseColor("#333333")),
@@ -224,6 +254,7 @@ fun RegisterScreen(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Lozinke se moraju podudarati",
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Red
                     )
                 }
@@ -260,7 +291,7 @@ fun RegisterScreen(
         Button(modifier = Modifier
             .fillMaxWidth()
             .wrapContentWidth(Alignment.CenterHorizontally)
-            .padding(top = 35.dp),
+            .padding(AppTheme.dimens.medium),
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(parseColor("#52B788"))),
             onClick = {
@@ -272,12 +303,12 @@ fun RegisterScreen(
                 modifier = Modifier.padding(5.dp),
                 text = "Registriraj se",
                 style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                    fontFamily = MaterialTheme.typography.displayMedium.fontFamily,
+                    fontSize = MaterialTheme.typography.displayMedium.fontSize,
+                    fontWeight = MaterialTheme.typography.displayMedium.fontWeight,
+                    textAlign = MaterialTheme.typography.displayMedium.textAlign,
                     color = Color.White
-                )
+                ),
             )
         }
 
@@ -286,29 +317,30 @@ fun RegisterScreen(
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(top = 35.dp)
-        ) {
+                .padding(AppTheme.dimens.small),
+            ) {
             Text(
                 modifier = Modifier.padding(5.dp),
                 text = "Već imaš Wuff! račun?",
                 style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center,
+                    fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontWeight = MaterialTheme.typography.bodySmall.fontWeight,
+                    textAlign = MaterialTheme.typography.bodySmall.textAlign,
                     color = Color.White
-                )
+                ),
             )
             ClickableText(
-                modifier = Modifier.padding(5.dp),
+                modifier = Modifier.padding(AppTheme.dimens.small),
                 text = AnnotatedString("Prijavi se"),
                 style = TextStyle(
-                    fontFamily = Opensans,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
+                    fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontWeight = MaterialTheme.typography.bodySmall.fontWeight,
+                    textAlign = MaterialTheme.typography.bodySmall.textAlign,
                     color = Color(parseColor("#52B788"))
                 ),
                 onClick = {

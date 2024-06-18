@@ -3,6 +3,8 @@ package com.filiptoprek.wuff.ui.theme
 import android.app.Activity
 import android.graphics.Color.parseColor
 import android.os.Build
+import android.util.Log
+import android.view.ViewConfiguration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -49,6 +51,73 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Purple40,
 
 )
+
+
+@Composable
+fun WuffThemeResponsive(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    windowSizeClass: WindowSizeClass = rememberWindowSizeClass(),
+    content: @Composable () -> Unit,
+    authViewModel: AuthViewModel
+) {
+    val currentUser: FirebaseUser? by authViewModel.currentUserLiveData.observeAsState()
+
+    val sizeThatMatters = windowSizeClass.height
+
+    val dimensions = when(sizeThatMatters){
+        is WindowSize.Small -> smallDimensions
+        is WindowSize.Compact -> compactDimensions
+        is WindowSize.Medium -> mediumDimensions
+        else -> largeDimensions
+    }
+
+    val typography = when(sizeThatMatters){
+        is WindowSize.Small -> typographySmall
+        is WindowSize.Compact -> typographyCompact
+        is WindowSize.Medium -> typographyMedium
+        else -> typographyBig
+    }
+
+    val colorScheme = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
+    val view = LocalView.current
+    if (currentUser == null) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = Color(parseColor("#081C15")).toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }else
+    {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = Color(parseColor("#ECECEC")).toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    ProvideAppUtils(dimensions = dimensions) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = typography,
+            content = content
+        )
+    }
+}
+
+object AppTheme{
+    val dimens:Dimensions
+        @Composable
+        get() = LocalAppDimens.current
+}
 
 @Composable
 fun WuffTheme(

@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -58,6 +59,7 @@ import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
 import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.service.LocationService
+import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -230,11 +232,10 @@ fun infoCard(text: String, buttonText: String, navController: NavHostController)
 {
     Row(
         modifier = Modifier
-            .width(IntrinsicSize.Max)
-            .fillMaxWidth()
             .wrapContentWidth()
             .background(colorResource(R.color.background_dark), RoundedCornerShape(8.dp))
-            .padding(15.dp),
+            .padding(15.dp)
+            .fillMaxWidth(),
 
     ){
         Column(
@@ -246,7 +247,13 @@ fun infoCard(text: String, buttonText: String, navController: NavHostController)
             Text(
                 text = text,
                 modifier = Modifier.padding(bottom = 15.dp),
-                color = Color.White
+                color = Color.White,
+                style = TextStyle(
+                    textAlign = TextAlign.Start,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
+                    fontWeight = MaterialTheme.typography.bodySmall.fontWeight
+                )
             )
             Button(modifier = Modifier
                 .fillMaxWidth()
@@ -426,7 +433,7 @@ fun walkerStats(profileViewModel: ProfileViewModel)
             )
             Text(
                 modifier = Modifier.align(Alignment.End),
-                text = profileViewModel?.userProfile?.balance.toString(),
+                text = profileViewModel.userProfile?.balance.toString(),
                 color = colorResource(R.color.gray),
                 style = TextStyle(
                     fontFamily = Opensans,
@@ -450,7 +457,7 @@ fun walkerStats(profileViewModel: ProfileViewModel)
             )
             Text(
                 modifier = Modifier.align(Alignment.End),
-                text = profileViewModel?.userProfile?.numOfWalks.toString(),
+                text = profileViewModel.userProfile?.numOfWalks.toString(),
                 color = colorResource(R.color.gray),
                 style = TextStyle(
                     fontFamily = Opensans,
