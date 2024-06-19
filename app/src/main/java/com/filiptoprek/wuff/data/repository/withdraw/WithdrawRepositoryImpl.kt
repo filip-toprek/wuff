@@ -17,12 +17,26 @@ import javax.inject.Inject
 class WithdrawRepositoryImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) : WithdrawRepository {
+
+    override suspend fun checkBalance(amount: Double, userId: String): Boolean {
+        val user = firebaseFirestore.collection("users").document(userId)
+            .get()
+            .await()
+            .toObject(UserProfile::class.java)
+
+        if(amount > user?.balance!!)
+            return false
+        return true
+    }
     override suspend fun createWithdrawalRequest(withdraw: Withdraw, withdrawProfile: WithdrawProfile, userProfile: UserProfile) {
         try {
             val user = firebaseFirestore.collection("users").document(userProfile.user.uid)
                 .get()
                 .await()
                 .toObject(UserProfile::class.java)
+
+            if(withdraw.amount > user?.balance!!)
+                return
 
             val withdrawals = firebaseFirestore.collection("withdrawals").document(userProfile.user.uid)
                 .get()

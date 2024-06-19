@@ -57,29 +57,37 @@ class WithdrawViewModel @Inject constructor(
         viewModelScope.launch {
             val currentUserProfile = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
             _withdrawFlow.value = Resource.Loading
-            val result = withdrawRepository.getWithdrawals(currentUserProfile!!)
+            try
+            {
+                val result = withdrawRepository.getWithdrawals(currentUserProfile!!)
+                _withdrawList.value = result
+                _withdrawFlow.value = Resource.Success(result)
+            }catch (e: Exception){
+                _withdrawFlow.value = Resource.Failure(e)
+            }
 
-            _withdrawList.value = result
-            _withdrawFlow.value = Resource.Success(result)
         }
     }
 
     fun createWithdrawal(withdraw: Withdraw, withdrawProfile: WithdrawProfile) {
-        when(validateWithdrawForm.validateForm(withdraw, withdrawProfile))
-        {
-            // handle failure
-            -1 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_AMOUNT"))
-            -2 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_IBAN"))
-            // handle success
-            1 -> {
-                viewModelScope.launch {
-                    val currentUserProfile = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
-                    _createWithdrawFlow.value = Resource.Loading
-                    val result = withdrawRepository.createWithdrawalRequest(withdraw, withdrawProfile, currentUserProfile!!)
-                    _createWithdrawFlow.value = Resource.Success(result)
-                    delayBeforeReset()
+        viewModelScope.launch {
+            when(validateWithdrawForm.validateForm(withdraw, withdrawProfile, withdrawRepository, authRepository))
+            {
+                // handle failure
+                -1 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_AMOUNT"))
+                -2 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_IBAN"))
+                // handle success
+                1 -> {
+                    viewModelScope.launch {
+                        val currentUserProfile = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
+                        _createWithdrawFlow.value = Resource.Loading
+                        val result = withdrawRepository.createWithdrawalRequest(withdraw, withdrawProfile, currentUserProfile!!)
+                        _createWithdrawFlow.value = Resource.Success(result)
+                        delayBeforeReset()
+                    }
                 }
             }
         }
+
     }
 }

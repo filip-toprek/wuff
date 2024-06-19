@@ -84,10 +84,13 @@ fun HomeScreen(
                 isLoading = true
             }
             is Resource.Success -> {
-                locationViewModel.getLocationOnStart()
                 isLoading = false
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        locationViewModel.getLocationOnStart()
     }
 
     Column(

@@ -60,8 +60,13 @@ class LocationViewModel @Inject constructor(
 
     fun getLocationOnStart() {
         viewModelScope.launch {
-            val location = locationRepository.getLocation(authRepository.currentUser?.uid.toString())
-            profileRepository.updateUserCity(authRepository.currentUser?.uid.toString(), getCityName(context, location.latitude, location.longitude)!!)
+            try{
+                val location = locationRepository.getLocation(authRepository.currentUser?.uid.toString())
+                profileRepository.updateUserCity(authRepository.currentUser?.uid.toString(), getCityName(context, location.latitude, location.longitude)!!)
+            }catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
         }
     }
 

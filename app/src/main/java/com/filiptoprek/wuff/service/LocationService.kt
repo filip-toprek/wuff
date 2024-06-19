@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 @AndroidEntryPoint
 class LocationService: Service() {
+    private var isRunning = false
 
     @Inject
     lateinit var locationClient: LocationClient
@@ -49,11 +50,13 @@ class LocationService: Service() {
 
     private fun start()
     {
-        if(authRepository.currentUser == null)
+        if(authRepository.currentUser == null || isRunning)
             return
 
+        isRunning = true
+
         val notification = NotificationCompat.Builder(this, "location")
-            .setContentTitle("Šetnja u tijeku...")
+            .setContentTitle("Praćenje lokacije...")
             .setSmallIcon(R.color.ic_launcher_background)
             .setOngoing(true)
 
@@ -73,6 +76,7 @@ class LocationService: Service() {
 
     private fun stop()
     {
+        isRunning = false
         stopForeground(true)
         stopSelf()
     }

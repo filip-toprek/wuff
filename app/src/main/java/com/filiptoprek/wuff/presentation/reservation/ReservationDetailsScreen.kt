@@ -1,6 +1,8 @@
 package com.filiptoprek.wuff.presentation.reservation
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +61,9 @@ fun ReservationDetailsScreen(
     sharedViewModel: SharedViewModel
 )
 {
+    val context = LocalContext.current
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
+
     Column(
         modifier = Modifier
             .background(colorResource(R.color.background_white))
@@ -306,6 +311,10 @@ fun ReservationDetailsScreen(
                         reservation.accepted && !reservation.completed && !reservation.started ->
                             ActionButton("Započni šetnju", colorResource(R.color.green_accent)) {
                                 reservationViewModel.startWalk(reservation)
+                                with(sharedPreferences.edit()) {
+                                    putBoolean("isWalking", true)
+                                    apply()
+                                }
                                 Intent(context, LocationService::class.java).apply {
                                     action = LocationService.ACTION_START
                                     context.startService(this)
@@ -316,6 +325,10 @@ fun ReservationDetailsScreen(
                         reservation.started && !reservation.completed ->
                             ActionButton("Završi šetnju", Color.Red) {
                                 reservationViewModel.endWalk(reservation)
+                                with(sharedPreferences.edit()) {
+                                    putBoolean("isWalking", false)
+                                    apply()
+                                }
                                 Intent(context, LocationService::class.java).apply {
                                     action = LocationService.ACTION_STOP
                                     context.startService(this)

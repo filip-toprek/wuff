@@ -8,6 +8,7 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserData
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -65,8 +66,9 @@ class AuthRepositoryImpl @Inject constructor(
                     aboutUser = "Jako volim ljude i šetnje uz plažu",
                     numOfWalks = 0,
                     user = UserData(
-                        result.user?.displayName.toString(),
-                        result.user?.photoUrl.toString())
+                        uid = result.user?.uid.toString(),
+                        name =  result.user?.displayName.toString(),
+                        profilePhotoUrl =  result.user?.photoUrl.toString())
                 ))
             Resource.Success(result.user!!)
         }catch (e: Exception)
@@ -113,6 +115,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun createUserProfile(userId: String, userProfile: UserProfile) {
         firebaseFirestore.collection("users").document(userId).set(userProfile).await()
+        firebaseFirestore.collection("locations").document(userId).set(LatLng(0.0,0.0)).await()
     }
 
 }

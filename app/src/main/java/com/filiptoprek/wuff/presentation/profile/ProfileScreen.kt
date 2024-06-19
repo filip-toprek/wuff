@@ -1,5 +1,8 @@
 package com.filiptoprek.wuff.presentation.profile
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -56,6 +60,7 @@ import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.profile.Walker
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
+import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -111,6 +116,8 @@ fun userProfile(
     var isError by remember { mutableStateOf(false) }
     val profileFlow = profileViewModel?.profileFlow?.collectAsState()
     var isLoading by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
 
     profileFlow?.value?.let {
         when(it){
@@ -247,7 +254,14 @@ fun userProfile(
                             containerColor = colorResource(R.color.green_accent)
                         ),
                         onClick = {
+                            if(sharedPreferences.getBoolean("isWalking", false))
+                                return@Button
+
                             viewModel?.viewModelScope?.launch {
+                                Intent(context, LocationService::class.java).apply {
+                                    action = LocationService.ACTION_STOP
+                                    context.startService(this)
+                                }
                                 viewModel.logout()
                                 navController.navigate(Routes.Login.route) {
                                     popUpTo(Routes.Home.route) { inclusive = true }
