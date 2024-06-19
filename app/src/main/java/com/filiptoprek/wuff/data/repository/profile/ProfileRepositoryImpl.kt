@@ -19,52 +19,47 @@ class ProfileRepositoryImpl @Inject constructor(
 ) : ProfileRepository {
 
     override suspend fun becomeWalker(userProfile: UserProfile, userId: String): Resource<UserProfile>? {
-        return try{
+        return try {
+            // Update the user's walker status
             firebaseFirestore.collection("users").document(userId).update("walker", userProfile.walker).await()
+            // Update the dateUpdated field
             firebaseFirestore.collection("users").document(userId).update("dateUpdated", System.currentTimeMillis()).await()
             Resource.Success(userProfile)
-        }catch (e: Exception)
-        {
+        } catch (e: Exception) {
             Resource.Failure(e)
         }
     }
 
     override suspend fun updateUserCity(userId: String, city: String) {
         try {
+            // Update the user's city
             firebaseFirestore.collection("users").document(userId).update("city", city).await()
-        }catch (e: Exception)
-        {
-            //
+        } catch (e: Exception) {
+            e.printStackTrace() // Log the exception
         }
     }
 
     override suspend fun updateUserProfile(userProfile: UserProfile, userId: String): Resource<UserProfile> {
         return try {
+            // Update the aboutUser field
             firebaseFirestore.collection("users").document(userId).update("aboutUser", userProfile.aboutUser).await()
+            // Update the dateUpdated field
             firebaseFirestore.collection("users").document(userId).update("dateUpdated", System.currentTimeMillis()).await()
             Resource.Success(userProfile)
-        }catch (e: Exception)
-        {
+        } catch (e: Exception) {
             Resource.Failure(e)
         }
     }
+
     override suspend fun getUserProfile(userId: String): UserProfile? {
-
-        var userProfile: UserProfile? = null;
-        try {
+        return try {
+            // Retrieve the user's profile document
             val result = firebaseFirestore.collection("users").document(userId).get().await()
-            if(result != null)
-            {
-                userProfile = result.toObject<UserProfile>()!!
-            }else
-            {
-                userProfile = null
-            }
-        }catch (e: Exception)
-        {
+            // Convert the document to UserProfile object if it exists
+            result?.toObject<UserProfile>()
+        } catch (e: Exception) {
             e.printStackTrace()
+            null
         }
-
-        return userProfile
     }
 }

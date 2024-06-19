@@ -46,6 +46,7 @@ import com.filiptoprek.wuff.domain.model.reload.Reload
 import com.filiptoprek.wuff.domain.model.withdraw.Withdraw
 import com.filiptoprek.wuff.domain.model.withdraw.WithdrawProfile
 import com.filiptoprek.wuff.navigation.Routes
+import com.filiptoprek.wuff.presentation.home.AppTitle
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.firebase.Timestamp
@@ -70,21 +71,7 @@ fun WithdrawRequestScreen(
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                text = "Wuff!",
-                style = TextStyle(
-                    fontFamily = Pattaya,
-                    fontSize = 50.sp,
-                    lineHeight = 27.sp,
-                    color = colorResource(R.color.green_accent)
-                )
-            )
-        }
+        AppTitle()
         Spacer(modifier = Modifier.size(20.dp))
 
         Row(

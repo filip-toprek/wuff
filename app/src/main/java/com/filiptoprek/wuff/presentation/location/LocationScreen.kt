@@ -37,6 +37,7 @@ import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.location.animateMarker
+import com.filiptoprek.wuff.presentation.home.AppTitle
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -78,21 +79,7 @@ fun LocationScreen(
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                text = "Wuff!",
-                style = TextStyle(
-                    fontFamily = Pattaya,
-                    fontSize = 50.sp,
-                    lineHeight = 27.sp,
-                    color = colorResource(R.color.green_accent)
-                )
-            )
-        }
+        AppTitle()
         Spacer(modifier = Modifier.size(20.dp))
 
         locationFlow.value?.let {

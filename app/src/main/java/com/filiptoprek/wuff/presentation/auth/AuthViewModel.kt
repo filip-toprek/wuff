@@ -1,5 +1,8 @@
 package com.filiptoprek.wuff.presentation.auth
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +10,7 @@ import com.filiptoprek.wuff.data.utils.await
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
 import com.filiptoprek.wuff.domain.usecase.auth.FormValidatorUseCase
+import com.filiptoprek.wuff.service.LocationService
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.common.api.ApiException
@@ -47,6 +51,8 @@ class AuthViewModel @Inject constructor(
             _loginFlow.value = Resource.Success(authRepository.currentUser!!)
         }
     }
+
+    // login with email and password
     fun login(email: String, password: String) = viewModelScope.launch {
         when(formValidatorUseCase.validateForm(email = email, password = password))
         {
@@ -63,6 +69,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    // register with email and password
     fun register(name: String, email: String, password: String, verifyPassword: String) = viewModelScope.launch {
         when(formValidatorUseCase.validateForm(name, email, password, verifyPassword))
         {
@@ -81,7 +88,8 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    suspend fun logout(){
+    // logout
+    fun logout(){
         viewModelScope.launch {
             authRepository.logout()
             googleSignInClient.signOut().await()
@@ -90,6 +98,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    // login/register using Google
     fun signInWithGoogle(task: Task<GoogleSignInAccount>, scope: CoroutineScope) {
         try {
             val account = task.getResult(ApiException::class.java)!!

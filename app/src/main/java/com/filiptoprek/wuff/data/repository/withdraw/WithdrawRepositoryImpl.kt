@@ -20,46 +20,54 @@ class WithdrawRepositoryImpl @Inject constructor(
 ) : WithdrawRepository {
     override suspend fun createWithdrawalRequest(withdraw: Withdraw, withdrawProfile: WithdrawProfile, userProfile: UserProfile) {
         try {
-            val user = firebaseFirestore.collection("users").document(userProfile.user.uid)
+            // Retrieve the user's profile document from Firestore
+            val user = firebaseFirestore.collection("users")
+                .document(userProfile.user.uid)
                 .get()
                 .await()
                 .toObject(UserProfile::class.java)
 
-            val withdrawals = firebaseFirestore.collection("withdrawals").document(userProfile.user.uid)
+            // Retrieve the withdrawals document for the user
+            val withdrawals = firebaseFirestore.collection("withdrawals")
+                .document(userProfile.user.uid)
                 .get()
                 .await()
                 .toObject(Withdrawals::class.java)
 
-            if(withdrawals == null)
-            {
+            if (withdrawals == null) {
+                // Create a new withdrawals document if it doesn't exist
                 firebaseFirestore.collection("withdrawals").document(userProfile.user.uid).set(
                     Withdrawals(
-                        withdrawals = listOf(
-                            withdraw
-                        ),
+                        withdrawals = listOf(withdraw),
                         withdrawProfile = withdrawProfile
                     )
-                )
-            }else
-            {
+                ).await()
+            } else {
+                // Update the existing withdrawals document
                 firebaseFirestore.collection("withdrawals").document(userProfile.user.uid).update(
                     "withdrawals", withdrawals.withdrawals.plus(withdraw)
-                )
+                ).await()
             }
 
-            firebaseFirestore.collection("users").document(userProfile.user.uid).update("balance", BigDecimal(user?.balance!! - withdraw.amount).setScale(2, RoundingMode.HALF_EVEN).toDouble())
+            // Update the user's balance
+            firebaseFirestore.collection("users").document(userProfile.user.uid).update(
+                "balance", BigDecimal(user?.balance!! - withdraw.amount)
+                    .setScale(2, RoundingMode.HALF_EVEN).toDouble()
+            ).await()
         } catch (e: Exception) {
-            //
+            Log.w("ERROR", "Failed to create withdrawal request: ${e.message}")
         }
     }
 
     override suspend fun getWithdrawals(userProfile: UserProfile): Withdrawals {
         return try {
+            // Retrieve the withdrawals document for the user
             firebaseFirestore.collection("withdrawals").document(userProfile.user.uid)
                 .get()
-                .await().toObject(Withdrawals::class.java)!!
+                .await()
+                .toObject(Withdrawals::class.java) ?: Withdrawals()
         } catch (e: Exception) {
-            Log.w("ERROR",e.message.toString())
+            Log.w("ERROR", "Failed to get withdrawals: ${e.message}")
             Withdrawals()
         }
     }

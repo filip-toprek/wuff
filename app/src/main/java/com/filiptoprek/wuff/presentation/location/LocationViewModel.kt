@@ -112,6 +112,7 @@ class LocationViewModel @Inject constructor(
         }
     }
 
+    // Function to start tracking location
     fun startLocationUpdates(walker: UserProfile) {
         viewModelScope.launch {
             while (isActive) {
@@ -128,6 +129,7 @@ class LocationViewModel @Inject constructor(
         }
     }
 
+    // Function sets user's city to current locatoin
     fun getLocationOnStart() {
         viewModelScope.launch {
             try {
@@ -140,7 +142,8 @@ class LocationViewModel @Inject constructor(
         }
     }
 
-    suspend private fun getCityName(context: android.content.Context, latitude: Double, longitude: Double): String? {
+    // Retrieves city name
+    private suspend fun getCityName(context: android.content.Context, latitude: Double, longitude: Double): String? {
         return withContext(Dispatchers.IO) {
             try {
                 val geocoder = Geocoder(context, Locale.getDefault())

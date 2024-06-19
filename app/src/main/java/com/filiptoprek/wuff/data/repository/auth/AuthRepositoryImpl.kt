@@ -8,6 +8,7 @@ import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.profile.UserData
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.repository.auth.AuthRepository
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -32,6 +33,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    //login with email and password
     override suspend fun login(email: String, password: String): Resource<FirebaseUser> {
         return try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
@@ -50,6 +52,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    // register with email and password
     override suspend fun register(
         name: String,
         email: String,
@@ -65,8 +68,9 @@ class AuthRepositoryImpl @Inject constructor(
                     aboutUser = "Jako volim ljude i šetnje uz plažu",
                     numOfWalks = 0,
                     user = UserData(
-                        result.user?.displayName.toString(),
-                        result.user?.photoUrl.toString())
+                        uid = result.user?.uid.toString(),
+                        name = result.user?.displayName.toString(),
+                        profilePhotoUrl = result.user?.photoUrl.toString())
                 ))
             Resource.Success(result.user!!)
         }catch (e: Exception)
@@ -81,6 +85,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    // logout
     override fun logout() {
         firebaseAuth.signOut()
     }
@@ -99,9 +104,9 @@ class AuthRepositoryImpl @Inject constructor(
                        aboutUser = "Jako volim ljude i šetnje uz plažu",
                        numOfWalks = 0,
                        user = UserData(
-                           result.user?.uid.toString(),
-                           result.user?.displayName.toString(),
-                           result.user?.photoUrl.toString())
+                           uid = result.user?.uid.toString(),
+                           name = result.user?.displayName.toString(),
+                           profilePhotoUrl = result.user?.photoUrl.toString())
                    ))
             }
             Resource.Success(result?.user!!)
@@ -111,8 +116,11 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    // user profile creation on register
     override suspend fun createUserProfile(userId: String, userProfile: UserProfile) {
         firebaseFirestore.collection("users").document(userId).set(userProfile).await()
+        // set location to Osijek on register (it will change on app open)
+        firebaseFirestore.collection("locations").document(userId).set(LatLng(45.55111,18.69389)).await()
     }
 
 }

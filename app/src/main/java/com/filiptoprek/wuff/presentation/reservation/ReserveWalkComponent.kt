@@ -154,9 +154,9 @@ fun reserveWalk(selectedWalker: UserProfile?, selectedText: MutableState<String>
                     )
                 )
             }
-            dropDownMenu(selectedText, walkTypes)
+            DropDownMenu(selectedText, walkTypes)
 
-            dateTimePickers(dateString, timeString)
+            DateTimePickers(dateString, timeString)
 
             Spacer(modifier = Modifier.size(10.dp))
             Text(
@@ -310,7 +310,7 @@ fun TimePickerDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun dropDownMenu(selectedText: MutableState<String>, walkTypes: List<WalkType?>)
+fun DropDownMenu(selectedText: MutableState<String>, walkTypes: List<WalkType?>)
 {
     var expanded by remember { mutableStateOf(false) }
 
@@ -416,7 +416,7 @@ fun dropDownMenu(selectedText: MutableState<String>, walkTypes: List<WalkType?>)
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun dateTimePickers(dateString: MutableState<String>, timeString: MutableState<String>)
+fun DateTimePickers(dateString: MutableState<String>, timeString: MutableState<String>)
 {
     val context = LocalContext.current
 

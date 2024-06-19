@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,17 +41,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.filiptoprek.wuff.R
-import com.filiptoprek.wuff.data.repository.location.LocationClientImpl
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
+import com.filiptoprek.wuff.presentation.home.AppTitle
 import com.filiptoprek.wuff.presentation.location.LocationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
-import com.filiptoprek.wuff.ui.theme.Pattaya
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalTextApi::class)
@@ -70,6 +67,11 @@ fun ReservationDetailsScreen(
     val context = LocalContext.current
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
     val walkFlow = reservationViewModel.walkFlow.collectAsState()
+    val fontFamily = FontFamily(Font(
+        R.font.opensans_variable, variationSettings = FontVariation.Settings(
+            FontVariation.weight(100)
+        )
+    ))
     Column(
         modifier = Modifier
             .background(colorResource(R.color.background_white))
@@ -77,21 +79,7 @@ fun ReservationDetailsScreen(
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                text = "Wuff!",
-                style = TextStyle(
-                    fontFamily = Pattaya,
-                    fontSize = 50.sp,
-                    lineHeight = 27.sp,
-                    color = colorResource(R.color.green_accent)
-                )
-            )
-        }
+        AppTitle()
         Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
         Row(
             modifier = Modifier
@@ -136,11 +124,6 @@ fun ReservationDetailsScreen(
                     contentDescription = "User image",
                 )
                 Spacer(modifier = Modifier.size(AppTheme.dimens.smallMedium))
-                val fontFamily = FontFamily(Font(
-                    R.font.opensans_variable, variationSettings = FontVariation.Settings(
-                        FontVariation.weight(100)
-                    )
-                ))
                 Text(
                     text = if (authViewModel.currentUser?.uid == reservation.walkerUserId) {
                         reservation.user?.user?.name.toString()
@@ -157,7 +140,7 @@ fun ReservationDetailsScreen(
                 )
                 Spacer(modifier = Modifier.size(AppTheme.dimens.medium))
 
-                walkDetails(
+                WalkDetails(
                     reservation,
                     fontFamily,
                     authViewModel,
@@ -264,7 +247,7 @@ fun ReservationDetailsScreen(
 }
 
 @Composable
-fun walkDetails(
+fun WalkDetails(
     reservation: Reservation,
     fontFamily: FontFamily,
     authViewModel: AuthViewModel,

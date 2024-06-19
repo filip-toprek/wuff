@@ -15,41 +15,39 @@ class LocationRepositoryImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     ) : LocationRepository {
     override suspend fun sendLocation(location: Location) {
+        // Update the Firestore document with the new location data
         firebaseFirestore.collection("locations").document(location.userId).update(
-                "longitude", location.longitude,
-                "latitude", location.latitude
+            "longitude", location.longitude,
+            "latitude", location.latitude
         ).await()
     }
 
     override suspend fun getLocationPoints(walkerId: String, reservationId: String): List<Location> {
         return try {
             val userDocument = firebaseFirestore.collection("locations").document(walkerId)
+            // Run a Firestore transaction to retrieve the location points
             firebaseFirestore.runTransaction { transaction ->
                 val documentSnapshot = transaction.get(userDocument)
-
-                documentSnapshot.get(reservationId) as? List<Location>
+                // Retrieve the list of locations for the specified reservationId
+                documentSnapshot.get(reservationId) as? List<Location> ?: emptyList()
             }.await()
-        }catch (e: Exception)
-        {
+        } catch (e: Exception) {
             e.printStackTrace()
-            emptyList<Location>()
+            emptyList()
         }
     }
+
     override suspend fun sendWalkLocationPoint(locationPoint: LocationPoint) {
         val userDocument = firebaseFirestore.collection("locations").document(locationPoint.location.userId)
-
         try {
+            // Run a Firestore transaction to add the new location point
             firebaseFirestore.runTransaction { transaction ->
                 val documentSnapshot = transaction.get(userDocument)
-
-                // Retrieve the array from the document
+                // Retrieve the existing array of location points
                 val array = documentSnapshot.get(locationPoint.reservationId) as? List<Location>
-
-                // Calculate the updated array
-                val updatedArray = array?.plus(locationPoint.location)
-                    ?: listOf(locationPoint.location)  // If array is null or empty, create a new list
-
-                // Update the document with the new array
+                // Calculate the updated array by adding the new location point
+                val updatedArray = array?.plus(locationPoint.location) ?: listOf(locationPoint.location)
+                // Update the Firestore document with the new array
                 transaction.update(userDocument, locationPoint.reservationId, updatedArray)
             }.await()
         } catch (e: Exception) {
@@ -58,12 +56,13 @@ class LocationRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getLocation(walkerId: String): Location {
-       return try {
-           firebaseFirestore.collection("locations").document(walkerId).get().await().toObject(Location::class.java)!!
-       }catch (e: Exception)
-       {
-           Location()
-       }
+    override suspend fun getLocation(userId: String): Location {
+        return try {
+            // Retrieve the location document from Firestore and convert it to a Location object
+            firebaseFirestore.collection("locations").document(userId).get().await().toObject(Location::class.java)!!
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Location() // Return a default Location object in case of an exception
+        }
     }
 }

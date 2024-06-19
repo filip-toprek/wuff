@@ -43,16 +43,20 @@ class WithdrawViewModel @Inject constructor(
         }
     }
 
+    // get withdrawals list
     fun refresh(){
         _withdrawList.value = Withdrawals()
         getWithdrawalsList()
     }
 
+    // helper function to delay the reset
     private suspend fun delayBeforeReset() {
         delay(1500)
         _createWithdrawFlow.value = null
     }
 
+
+    // get withdrawals list from firestore
     private fun getWithdrawalsList() {
         viewModelScope.launch {
             val currentUserProfile = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
@@ -66,6 +70,8 @@ class WithdrawViewModel @Inject constructor(
         }
     }
 
+
+    // create a new withdrawal request
     fun createWithdrawal(withdraw: Withdraw, withdrawProfile: WithdrawProfile) {
         when(validateWithdrawForm.validateForm(withdraw, withdrawProfile))
         {

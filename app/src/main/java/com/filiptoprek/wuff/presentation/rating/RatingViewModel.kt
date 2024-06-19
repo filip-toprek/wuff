@@ -18,6 +18,7 @@ class RatingViewModel @Inject constructor(
     private val _ratingFlow = MutableStateFlow<Resource<Any>?>(null)
     val ratingFlow: StateFlow<Resource<Any>?> = _ratingFlow
 
+    // add a rating for user
     fun addReview(review: Review)
     {
         viewModelScope.launch {

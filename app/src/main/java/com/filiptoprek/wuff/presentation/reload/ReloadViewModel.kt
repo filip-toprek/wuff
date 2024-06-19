@@ -49,18 +49,22 @@ class ReloadViewModel @Inject constructor(
                 }
             }
     }
+
+    // reload user's balance
     fun reload(reload: Reload)
     {
         reload.reloadUser = authRepository.currentUser?.uid.toString()
         viewModelScope.launch {
             _reloadFlow.value = Resource.Loading
             try {
-                _reloadFlow.value = reloadRepository.reloadBalance(reload)
+                reloadRepository.reloadBalance(reload)
             }catch (e: Exception) {
                 _reloadFlow.value = Resource.Failure(e)
             }
         }
     }
+
+    // old function for reloading user's balance
     fun reloadBalance(reload: Reload, ccYear: String, ccMonth: String, Cvv: String, ccNum: String)
     {
         when(reloadFormUseCase.validateForm(ccYear, ccMonth, Cvv, reload, ccNum))

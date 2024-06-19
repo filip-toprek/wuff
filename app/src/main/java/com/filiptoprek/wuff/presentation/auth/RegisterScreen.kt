@@ -42,19 +42,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.ui.theme.AppTheme
-import com.filiptoprek.wuff.ui.theme.Opensans
-import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.common.api.ApiException
@@ -100,166 +94,21 @@ fun RegisterScreen(
 
     Column(
         modifier = Modifier
-            .background(Color(android.graphics.Color.parseColor("#081C15")))
+            .background(colorResource(R.color.background_dark))
             .fillMaxSize()
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally),
-            text = "Wuff!",
-            style = TextStyle(
-                fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-                textAlign = MaterialTheme.typography.titleLarge.textAlign,
-                color = Color.White
-            ),
-        )
+        AuthTitle()
         Spacer(modifier = Modifier.size(AppTheme.dimens.customSpacing))
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally),
-            value = nameText,
-            onValueChange = { nameText = it },
-            textStyle = MaterialTheme.typography.labelSmall,
-            label = {
-                Text("Ime i prezime",
-                color = Color(parseColor("#333333")),
-                style = MaterialTheme.typography.bodySmall
-                )
-                    },
-            shape = RoundedCornerShape(8.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                unfocusedTextColor = Color(parseColor("#333333")),
-                containerColor = Color.White,
-                cursorColor = Color(parseColor("#52B788")),
-                disabledLabelColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = colorResource(R.color.gray),
-            ),
-            supportingText = {
-                if (errorText == "BAD_NAME") {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Molimo unesite vaše ime i prezime",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Red
-                    )
-                }
-            }
-        )
-
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally),
-            value = emailText,
-            onValueChange = { emailText = it },
-            textStyle = MaterialTheme.typography.labelSmall,
-            label = {
-                Text("Email",
-                    color = Color(parseColor("#333333")),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                    },
-            shape = RoundedCornerShape(8.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                unfocusedTextColor = Color(parseColor("#333333")),
-                containerColor = Color.White,
-                cursorColor = Color(parseColor("#52B788")),
-                disabledLabelColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = colorResource(R.color.gray)
-            ),
-            supportingText = {
-                if (errorText == "BAD_EMAIL") {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Molimo unesite vašu email adresu",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Red
-                    )
-                }
-            }
-        )
-
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally) ,
-            value = passwordText,
-            onValueChange = { passwordText = it },
-            textStyle = MaterialTheme.typography.labelSmall,
-            visualTransformation = PasswordVisualTransformation(),
-            label = {
-                Text("Lozinka",
-                    color = Color(parseColor("#333333")),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                    },
-            shape = RoundedCornerShape(8.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                unfocusedTextColor = Color(parseColor("#333333")),
-                containerColor = Color.White,
-                cursorColor = Color(parseColor("#52B788")),
-                disabledLabelColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = colorResource(R.color.gray)
-            ),
-            supportingText = {
-                if (errorText == "BAD_PASSWORD") {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Lozinka mora sadržavati 8 znakova i jedan broj",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Red
-                    )
-                }
-            }
-        )
-
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally) ,
-            value = verifyPasswordText,
-            onValueChange = { verifyPasswordText = it },
-            visualTransformation = PasswordVisualTransformation(),
-            textStyle = MaterialTheme.typography.labelSmall,
-            label = {
-                Text("Potvrdi lozinku",
-                    color = Color(parseColor("#333333")),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                    },
-            shape = RoundedCornerShape(8.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                unfocusedTextColor = Color(parseColor("#333333")),
-                containerColor = Color.White,
-                cursorColor = Color(parseColor("#52B788")),
-                disabledLabelColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedTextColor = colorResource(R.color.gray)
-            ),
-            supportingText = {
-                if (errorText == "NO_MATCH") {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Lozinke se moraju podudarati",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Red
-                    )
-                }
-            }
-        )
+        RegisterForm(
+            errorText,
+            {errorText = it},
+            nameText, {nameText = it},
+            emailText, {emailText = it},
+            passwordText, {passwordText = it},
+            verifyPasswordText, {verifyPasswordText = it},
+            viewModel)
 
         registerFlow?.value?.let {
             when (it) {
@@ -288,65 +137,209 @@ fun RegisterScreen(
         }
 
 
-        Button(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentWidth(Alignment.CenterHorizontally)
-            .padding(AppTheme.dimens.medium),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(parseColor("#52B788"))),
-            onClick = {
-                errorText = ""
-                viewModel?.register(nameText, emailText, passwordText, verifyPasswordText)
-            })
-        {
-            Text(
-                modifier = Modifier.padding(5.dp),
-                text = "Registriraj se",
-                style = TextStyle(
-                    fontFamily = MaterialTheme.typography.displayMedium.fontFamily,
-                    fontSize = MaterialTheme.typography.displayMedium.fontSize,
-                    fontWeight = MaterialTheme.typography.displayMedium.fontWeight,
-                    textAlign = MaterialTheme.typography.displayMedium.textAlign,
-                    color = Color.White
-                ),
-            )
-        }
-
         GoogleSignInButton(text = "Registriraj") {
             launcher.launch(googleSignInClient?.signInIntent!!)
         }
+        RegisterFooter(navController)
+    }
+}
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(AppTheme.dimens.small),
-            ) {
-            Text(
-                modifier = Modifier.padding(5.dp),
-                text = "Već imaš Wuff! račun?",
-                style = TextStyle(
-                    fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    fontWeight = MaterialTheme.typography.bodySmall.fontWeight,
-                    textAlign = MaterialTheme.typography.bodySmall.textAlign,
-                    color = Color.White
-                ),
+@Composable
+fun RegisterForm(
+    errorText: String,
+    onErrorChange: (String)->Unit,
+    nameText: String,
+    onNameChange: (String)->Unit,
+    emailText: String,
+    onEmailChange: (String)->Unit,
+    passwordText: String,
+    onPasswordChange: (String)->Unit,
+    verifyPasswordText: String,
+    onVerifyPasswordChange: (String)->Unit,
+    authViewModel: AuthViewModel?
+    ) {
+
+    TextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth(Alignment.CenterHorizontally),
+        value = nameText,
+        onValueChange = { onNameChange(it) },
+        textStyle = MaterialTheme.typography.labelSmall,
+        label = {
+            Text("Ime i prezime",
+                color = colorResource(R.color.gray),
+                style = MaterialTheme.typography.bodySmall
             )
-            ClickableText(
-                modifier = Modifier.padding(AppTheme.dimens.small),
-                text = AnnotatedString("Prijavi se"),
-                style = TextStyle(
-                    fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    fontWeight = MaterialTheme.typography.bodySmall.fontWeight,
-                    textAlign = MaterialTheme.typography.bodySmall.textAlign,
-                    color = Color(parseColor("#52B788"))
-                ),
-                onClick = {
-                    navController.navigate(Routes.Login.route)
-                }
-            )
+        },
+        shape = RoundedCornerShape(8.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            unfocusedTextColor = colorResource(R.color.gray),
+            containerColor = Color.White,
+            cursorColor = colorResource(R.color.background_dark),
+            disabledLabelColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedTextColor = colorResource(R.color.gray),
+        ),
+        supportingText = {
+            if (errorText == "BAD_NAME") {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Molimo unesite vaše ime i prezime",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Red
+                )
+            }
         }
+    )
+
+    TextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth(Alignment.CenterHorizontally),
+        value = emailText,
+        onValueChange = { onEmailChange(it) },
+        textStyle = MaterialTheme.typography.labelSmall,
+        label = {
+            Text("Email",
+                color = colorResource(R.color.gray),
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        shape = RoundedCornerShape(8.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            unfocusedTextColor = colorResource(R.color.gray),
+            containerColor = Color.White,
+            cursorColor = colorResource(R.color.background_dark),
+            disabledLabelColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedTextColor = colorResource(R.color.gray)
+        ),
+        supportingText = {
+            if (errorText == "BAD_EMAIL") {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Molimo unesite vašu email adresu",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Red
+                )
+            }
+        }
+    )
+
+    TextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth(Alignment.CenterHorizontally) ,
+        value = passwordText,
+        onValueChange = { onPasswordChange(it) },
+        textStyle = MaterialTheme.typography.labelSmall,
+        visualTransformation = PasswordVisualTransformation(),
+        label = {
+            Text("Lozinka",
+                color = colorResource(R.color.gray),
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        shape = RoundedCornerShape(8.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            unfocusedTextColor = colorResource(R.color.gray),
+            containerColor = Color.White,
+            cursorColor = colorResource(R.color.background_dark),
+            disabledLabelColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedTextColor = colorResource(R.color.gray)
+        ),
+        supportingText = {
+            if (errorText == "BAD_PASSWORD") {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Lozinka mora sadržavati 8 znakova i jedan broj",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Red
+                )
+            }
+        }
+    )
+
+    TextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth(Alignment.CenterHorizontally) ,
+        value = verifyPasswordText,
+        onValueChange = { onVerifyPasswordChange(it) },
+        visualTransformation = PasswordVisualTransformation(),
+        textStyle = MaterialTheme.typography.labelSmall,
+        label = {
+            Text("Potvrdi lozinku",
+                color = colorResource(R.color.gray),
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        shape = RoundedCornerShape(8.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            unfocusedTextColor = colorResource(R.color.gray),
+            containerColor = Color.White,
+            cursorColor = colorResource(R.color.background_dark),
+            disabledLabelColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedTextColor = colorResource(R.color.gray)
+        ),
+        supportingText = {
+            if (errorText == "NO_MATCH") {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Lozinke se moraju podudarati",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Red
+                )
+            }
+        }
+    )
+
+    Button(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentWidth(Alignment.CenterHorizontally)
+        .padding(AppTheme.dimens.medium),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(parseColor("#52B788"))),
+        onClick = {
+            onErrorChange("")
+            authViewModel?.register(nameText, emailText, passwordText, verifyPasswordText)
+        })
+    {
+        Text(
+            modifier = Modifier.padding(5.dp),
+            text = "Registriraj se",
+            style = MaterialTheme.typography.displayMedium.copy(color = Color.White),
+        )
+    }
+}
+
+@Composable
+fun RegisterFooter(navController: NavHostController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth(Alignment.CenterHorizontally)
+            .padding(AppTheme.dimens.mediumLarge),
+    ) {
+        Text(
+            modifier = Modifier.padding(5.dp),
+            text = "Već imaš Wuff! račun?",
+            style = MaterialTheme.typography.bodySmall.copy(color = Color.White),
+        )
+        ClickableText(
+            modifier = Modifier.padding(5.dp),
+            text = AnnotatedString("Prijavi se"),
+            style = MaterialTheme.typography.bodySmall.copy(color = colorResource(R.color.green_accent)),
+            onClick = {
+                navController.navigate(Routes.Login.route)
+            }
+        )
     }
 }

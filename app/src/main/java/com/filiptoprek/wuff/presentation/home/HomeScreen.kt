@@ -1,6 +1,5 @@
 package com.filiptoprek.wuff.presentation.home
 
-import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -27,7 +26,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -55,11 +52,7 @@ import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.location.LocationViewModel
 import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
-import com.filiptoprek.wuff.presentation.reload.ReloadViewModel
-import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
-import com.filiptoprek.wuff.service.LocationService
-import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -79,7 +72,7 @@ fun HomeScreen(
     val walkerList = homeViewModel.walkerList.collectAsState()
 
     var isLoading by remember { mutableStateOf(false) }
-    var reserved by remember { mutableStateOf(false) }
+    val reserved by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         locationViewModel.getLocationOnStart()
@@ -106,21 +99,7 @@ fun HomeScreen(
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                text = "Wuff!",
-                style = TextStyle(
-                    fontFamily = Pattaya,
-                    fontSize = 50.sp,
-                    lineHeight = 27.sp,
-                    color = colorResource(R.color.green_accent)
-                )
-            )
-        }
+        AppTitle()
         if(reserved)
         {
             homeFlow.value?.let {
@@ -149,78 +128,10 @@ fun HomeScreen(
 
                 if(profileViewModel.userProfile?.walker?.approved == true)
                 {
-                    Text(
-                        text = "Pozdrav, ${profileViewModel.userProfile?.user?.name.toString().split(" ")[0]}",
-                        color = colorResource(R.color.gray),
-                        style = TextStyle(
-                            fontFamily = Opensans,
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center,
-                            color = Color.White
-                        )
-                    )
-                    walkerStats(profileViewModel)
-
-                    Button(modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(R.color.green_accent)
-                        ),
-                        onClick = {
-                            navController.navigate(Routes.Withdrawals.route)
-                        })
-                    {
-                        Text(
-                            modifier = Modifier,
-                            text = "Isplati",
-                            style = TextStyle(
-                                fontFamily = Opensans,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                color = Color.White
-                            )
-                        )
-                    }
-
+                    WalkerHome(profileViewModel, navController)
                 }else
                 {
-                    infoCard("Jednostavno i brzno nadopuni svoj novčanik", "Nadopuni", navController)
-                    Spacer(modifier = Modifier.size(20.dp))
-                    Column(
-                        modifier = Modifier
-                    ) {
-                        Row (
-                            modifier = Modifier
-                                .fillMaxWidth()
-
-                        ){
-                            Text(
-                                text = "Šetači",
-                                style = TextStyle(
-                                fontFamily = Opensans,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                color = colorResource(R.color.gray))
-                            )
-                            Spacer(Modifier.weight(1f))
-                        }
-                        if(isLoading)
-                        {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentWidth(Alignment.CenterHorizontally)
-                                    .wrapContentHeight(Alignment.CenterVertically),
-                                color = colorResource(R.color.green_accent)
-                            )
-                        }else {
-                            walkerTab(walkerList.value, homeViewModel, navController, sharedViewModel)
-                        }
-                    }
+                    UserHome(navController, isLoading, walkerList.value, homeViewModel, sharedViewModel)
                 }
             }
         }
@@ -228,7 +139,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun infoCard(text: String, buttonText: String, navController: NavHostController)
+fun InfoCard(text: String, buttonText: String, navController: NavHostController)
 {
     Row(
         modifier = Modifier
@@ -296,7 +207,7 @@ fun infoCard(text: String, buttonText: String, navController: NavHostController)
 
 
 @Composable
-fun walkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navController: NavHostController, sharedViewModel: SharedViewModel)
+fun WalkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navController: NavHostController, sharedViewModel: SharedViewModel)
 {
     var refreshing by remember { mutableStateOf(false) }
 
@@ -405,10 +316,46 @@ fun walkerTab(walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, navC
     }
 }
 
+@Composable
+fun UserHome(navController: NavHostController, isLoading: Boolean, walkerList: List<UserProfile?>, homeViewModel: HomeViewModel, sharedViewModel: SharedViewModel) {
+    InfoCard("Jednostavno i brzno nadopuni svoj novčanik", "Nadopuni", navController)
+    Spacer(modifier = Modifier.size(20.dp))
+    Column(
+        modifier = Modifier
+    ) {
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
 
+        ){
+            Text(
+                text = "Šetači",
+                style = TextStyle(
+                    fontFamily = Opensans,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(R.color.gray))
+            )
+            Spacer(Modifier.weight(1f))
+        }
+        if(isLoading)
+        {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .wrapContentHeight(Alignment.CenterVertically),
+                color = colorResource(R.color.green_accent)
+            )
+        }else {
+            WalkerTab(walkerList, homeViewModel, navController, sharedViewModel)
+        }
+    }
+}
 
 @Composable
-fun walkerStats(profileViewModel: ProfileViewModel)
+fun WalkerStats(profileViewModel: ProfileViewModel)
 {
     Row(
         modifier = Modifier
@@ -504,5 +451,63 @@ fun walkerStats(profileViewModel: ProfileViewModel)
             )
         }
 
+    }
+}
+
+@Composable
+fun AppTitle() {
+    Row {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)
+                .padding(top = 15.dp),
+            text = "Wuff!",
+            style = TextStyle(
+                fontFamily = Pattaya,
+                fontSize = 50.sp,
+                lineHeight = 27.sp,
+                color = colorResource(R.color.green_accent)
+            )
+        )
+    }
+}
+
+@Composable
+fun WalkerHome(profileViewModel: ProfileViewModel, navController: NavHostController) {
+    Text(
+        text = "Pozdrav, ${profileViewModel.userProfile?.user?.name.toString().split(" ")[0]}",
+        color = colorResource(R.color.gray),
+        style = TextStyle(
+            fontFamily = Opensans,
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center,
+            color = Color.White
+        )
+    )
+    WalkerStats(profileViewModel)
+
+    Button(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentWidth(Alignment.CenterHorizontally),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorResource(R.color.green_accent)
+        ),
+        onClick = {
+            navController.navigate(Routes.Withdrawals.route)
+        })
+    {
+        Text(
+            modifier = Modifier,
+            text = "Isplati",
+            style = TextStyle(
+                fontFamily = Opensans,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = Color.White
+            )
+        )
     }
 }

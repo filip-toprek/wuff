@@ -1,5 +1,8 @@
 package com.filiptoprek.wuff.presentation.profile
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -47,7 +51,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -57,15 +60,14 @@ import com.filiptoprek.wuff.domain.model.profile.UserProfile
 import com.filiptoprek.wuff.domain.model.profile.Walker
 import com.filiptoprek.wuff.navigation.Routes
 import com.filiptoprek.wuff.presentation.auth.AuthViewModel
+import com.filiptoprek.wuff.presentation.home.AppTitle
+import com.filiptoprek.wuff.service.LocationService
 import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,6 +115,8 @@ fun userProfile(
     var isError by remember { mutableStateOf(false) }
     val profileFlow = profileViewModel?.profileFlow?.collectAsState()
     var isLoading by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("WuffPreferences", Context.MODE_PRIVATE)
 
     profileFlow?.value?.let {
         when(it){
@@ -134,21 +138,7 @@ fun userProfile(
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                text = "Wuff!",
-                style = TextStyle(
-                    fontFamily = Pattaya,
-                    fontSize = 50.sp,
-                    lineHeight = 27.sp,
-                    color = colorResource(R.color.green_accent)
-                )
-            )
-        }
+        AppTitle()
         Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
         if(isLoading) {
             CircularProgressIndicator(
@@ -213,7 +203,7 @@ fun userProfile(
                 }
 
                 if (!isEditing && !isApplying) {
-                    profileData(profileViewModel?.userProfile!!)
+                    ProfileData(profileViewModel?.userProfile!!)
 
                     Button(modifier = Modifier
                         .fillMaxWidth()
@@ -249,8 +239,14 @@ fun userProfile(
                             containerColor = colorResource(R.color.green_accent)
                         ),
                         onClick = {
-                            viewModel?.viewModelScope?.launch {
-                                viewModel.logout()
+                            val isWalking = sharedPreferences.getBoolean("isWalking", false)
+                            if(!isWalking || profileViewModel.userProfile?.walker?.approved == false)
+                            {
+                                Intent(context, LocationService::class.java).apply {
+                                    action = LocationService.ACTION_STOP
+                                    context.startService(this)
+                                }
+                                viewModel?.logout()
                                 navController.navigate(Routes.Login.route) {
                                     popUpTo(Routes.Home.route) { inclusive = true }
                                 }
@@ -327,14 +323,14 @@ fun userProfile(
                     val onApplied: (Boolean) -> Unit = { newValue ->
                         isApplying = newValue
                     }
-                    becomeWalker(profileViewModel, onApplied)
+                    BecomeWalker(profileViewModel, onApplied)
                 }else
             {
                 var aboutUser by remember { mutableStateOf(profileViewModel?.userProfile?.aboutUser.toString()) }
                 val onAboutUserChanged: (String) -> Unit = { newValue ->
                     aboutUser = newValue
                 }
-                editingModal(profileViewModel, aboutUser, onAboutUserChanged, isError)
+                EditingModal(profileViewModel, aboutUser, onAboutUserChanged, isError)
                 Button(modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentWidth(Alignment.CenterHorizontally)
@@ -372,7 +368,7 @@ fun userProfile(
 }
 
 @Composable
-fun profileData(user: UserProfile, isProfile: Boolean = true)
+fun ProfileData(user: UserProfile, isProfile: Boolean = true)
 {
 
     Row(
@@ -477,7 +473,7 @@ fun profileData(user: UserProfile, isProfile: Boolean = true)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun editingModal(profileViewModel: ProfileViewModel?, aboutUser: String, onAboutUserChanged: (String) -> Unit, isError: Boolean)
+fun EditingModal(profileViewModel: ProfileViewModel?, aboutUser: String, onAboutUserChanged: (String) -> Unit, isError: Boolean)
 {
     Row(
         modifier = Modifier
@@ -537,7 +533,7 @@ fun editingModal(profileViewModel: ProfileViewModel?, aboutUser: String, onAbout
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun becomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Unit){
+fun BecomeWalker(profileViewModel: ProfileViewModel?, onApplied: (Boolean) -> Unit){
 
         var phoneNumber by remember { mutableStateOf("") }
         var address by remember { mutableStateOf("") }

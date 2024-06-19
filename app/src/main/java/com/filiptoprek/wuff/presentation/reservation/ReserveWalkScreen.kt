@@ -46,6 +46,7 @@ import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.navigation.Routes
+import com.filiptoprek.wuff.presentation.home.AppTitle
 import com.filiptoprek.wuff.presentation.shared.SharedViewModel
 import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
@@ -78,22 +79,7 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                text = "Wuff!",
-                style = TextStyle(
-                    fontFamily = Pattaya,
-                    fontSize = 50.sp,
-                    lineHeight = 27.sp,
-                    color = colorResource(R.color.green_accent)
-                )
-            )
-        }
-
+        AppTitle()
         Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
         Row(
             modifier = Modifier
@@ -158,9 +144,9 @@ fun ReserveWalkScreen(reservationViewModel: ReservationViewModel, sharedViewMode
                         )
                     )
                 }
-                dropDownMenu(selectedText, walkTypeList.value)
+                DropDownMenu(selectedText, walkTypeList.value)
 
-                dateTimePickers(dateString, timeString)
+                DateTimePickers(dateString, timeString)
 
                 Spacer(modifier = Modifier.size(AppTheme.dimens.smallMedium))
                 Text(

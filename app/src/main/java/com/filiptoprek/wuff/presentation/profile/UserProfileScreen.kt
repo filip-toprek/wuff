@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.profile.UserProfile
-import com.filiptoprek.wuff.presentation.auth.AuthViewModel
 import com.filiptoprek.wuff.ui.theme.AppTheme
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
@@ -110,7 +109,7 @@ fun userProfileScreen(userProfile: UserProfile)
                 )
             }
             Spacer(modifier = Modifier.size(AppTheme.dimens.mediumLarge))
-            profileData(userProfile, false)
+            ProfileData(userProfile, false)
         }
     }
 }

@@ -67,6 +67,7 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // observe user, when user is not null get reservation list
     private fun observeCurrentUser() {
         authRepository.currentUserLiveData.observeForever { currentUser ->
             if (currentUser != null) {
@@ -77,16 +78,19 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // when app is closed clear all observers
     override fun onCleared() {
         authRepository.currentUserLiveData.removeObserver {  }
         super.onCleared()
     }
 
+    // helper function to delay reset
     private suspend fun delayBeforeReset() {
         delay(1500)
         _reservationCreateFlow.value = null
     }
 
+    // function for creating a reservatoin
     fun createReservation(reservation: Reservation) {
         if(validateReservationUseCase.validateReservationUseCase(reservation))
         {
@@ -104,12 +108,14 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // get reservations from firestore
     fun refreshReservations()
     {
         _reservationsList.value = emptyList<Reservation>()
         getReservationsList()
     }
 
+    // get reservations from firestore
     private fun getReservationsList() {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
@@ -137,6 +143,7 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // delete reservation
     fun deleteReservation(reservation: Reservation) {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
@@ -147,11 +154,13 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // function to start a walk
     fun startWalk(reservation: Reservation) {
         viewModelScope.launch {
             _walkFlow.value = Resource.Loading
             val walkerLocation = locationRepository.getLocation(reservation.walkerUserId)
             val userLocation = locationRepository.getLocation(reservation.userId)
+            // only start a walk if walker is within proximity to user
             val result =
                 if(walkerLocation.isWithinProximity(walkerLocation, userLocation, 100.0))
                 {
@@ -166,11 +175,13 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // function to end the walk
     fun endWalk(reservation: Reservation) {
         viewModelScope.launch {
             _walkFlow.value = Resource.Loading
             val walkerLocation = locationRepository.getLocation(reservation.walkerUserId)
             val userLocation = locationRepository.getLocation(reservation.userId)
+            // only end walk when walker is within proximity of user
             val result =
                 if(walkerLocation.isWithinProximity(walkerLocation, userLocation, 100.0))
                 {
@@ -185,6 +196,7 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // function to accept a reservation
     fun acceptReservation(reservation: Reservation) {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
@@ -194,6 +206,7 @@ class ReservationViewModel @Inject constructor(
             getReservationsList()
         }
     }
+    // function to decline a reservation
     fun declineReservation(reservation: Reservation) {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading
@@ -204,6 +217,7 @@ class ReservationViewModel @Inject constructor(
         }
     }
 
+    // helper function to get walker by walkerId and fill in the list with walker info
     private suspend fun getWalker(resList: List<Reservation>) : List<Reservation>
     {
         for (reservation in resList)
@@ -218,6 +232,8 @@ class ReservationViewModel @Inject constructor(
         return resList
     }
 
+
+    // get user by userId and fill in the user info in reservation list
     private suspend fun getUser(resList: List<Reservation>) : List<Reservation>
     {
         for (reservation in resList)
@@ -227,6 +243,7 @@ class ReservationViewModel @Inject constructor(
         return resList
     }
 
+    // get walk types from firestore
     private fun getWalkTypeList() {
         viewModelScope.launch {
             _reservationFlow.value = Resource.Loading

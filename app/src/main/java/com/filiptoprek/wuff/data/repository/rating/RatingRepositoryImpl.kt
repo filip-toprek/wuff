@@ -18,24 +18,49 @@ class RatingRepositoryImpl  @Inject constructor(
 ) : RatingRepository {
     override suspend fun getWalkerReviews(userId: String): List<Review> {
         return try {
-            val user = firebaseFirestore.collection("users").document(userId)
+            // Retrieve the user's profile document from Firestore
+            val userProfile = firebaseFirestore.collection("users").document(userId)
                 .get()
-                .await().toObject(UserProfile::class.java)
-            user?.walker?.reviews!!
+                .await()
+                .toObject(UserProfile::class.java)
+
+            // Return the list of reviews or an empty list if null
+            userProfile?.walker?.reviews ?: emptyList()
         } catch (e: Exception) {
+            e.printStackTrace() // Log the exception
             emptyList()
         }
     }
 
     override suspend fun rateUser(review: Review): Resource<Unit> {
-        val reviewList: List<Review> = firebaseFirestore.collection("users").document(review.walkerId).get().await().toObject(UserProfile::class.java)?.walker?.reviews ?: emptyList()
         return try {
-            firebaseFirestore.collection("users").document(review.walkerId).update("walker.reviews", reviewList.plus(review)).await()
-            val ratingList: List<Int> = reviewList.plus(review).map { it.rating }
-            firebaseFirestore.collection("users").document(review.walkerId).update("walker.averageRating", BigDecimal(ratingList.average()).setScale(2, RoundingMode.HALF_EVEN).toDouble()).await()
+            // Retrieve the current list of reviews for the walker
+            val userProfile = firebaseFirestore.collection("users").document(review.walkerId)
+                .get()
+                .await()
+                .toObject(UserProfile::class.java)
+
+            val reviewList = userProfile?.walker?.reviews ?: emptyList()
+
+            // Add the new review to the list
+            val updatedReviewList = reviewList.plus(review)
+
+            // Update the walker's reviews and average rating
+            firebaseFirestore.collection("users").document(review.walkerId).update(
+                mapOf(
+                    "walker.reviews" to updatedReviewList,
+                    "walker.averageRating" to BigDecimal(updatedReviewList.map { it.rating }.average())
+                        .setScale(2, RoundingMode.HALF_EVEN)
+                        .toDouble()
+                )
+            ).await()
+
+            // Mark the reservation as rated
             firebaseFirestore.collection("reservations").document(review.walkId).update("rated", true).await()
+
             Resource.Success(Unit)
         } catch (e: Exception) {
+            e.printStackTrace() // Log the exception
             Resource.Failure(e)
         }
     }

@@ -36,24 +36,28 @@ class ProfileViewModel @Inject constructor(
             return profile
         }
 
+    // obsereve user, if current user is null load user profile
     private fun observeCurrentUser() {
         authRepository.currentUserLiveData.observeForever { currentUser ->
             if (currentUser != null) {
-                    loadUserProfile()
+                loadUserProfile()
             }
         }
     }
 
+    // remove observer when user exits the app
     override fun onCleared() {
         authRepository.currentUserLiveData.removeObserver {  }
         super.onCleared()
     }
 
+    // reload user profile from firestore
     fun refreshUser()
     {
         loadUserProfile()
     }
 
+    // Send walker application to firestore
     fun becomeWalker(userProfile: UserProfile) {
         viewModelScope.launch {
             _profileFlow.value = Resource.Loading
@@ -72,6 +76,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    // update user profile
     fun updateUserProfile(userProfile: UserProfile): Boolean
     {
         if(!validateAboutUserUseCase.validateAboutUser(userProfile.aboutUser))
@@ -97,6 +102,8 @@ class ProfileViewModel @Inject constructor(
 
         return true
     }
+
+    // Load user profile from firestore
     private fun loadUserProfile() {
         _profileFlow.value = Resource.Loading
         viewModelScope.launch {

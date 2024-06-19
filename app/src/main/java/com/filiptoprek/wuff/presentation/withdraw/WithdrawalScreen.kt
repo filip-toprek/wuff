@@ -33,19 +33,14 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.substring
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
-import com.filiptoprek.wuff.domain.model.reservation.Reservation
 import com.filiptoprek.wuff.domain.model.withdraw.Withdraw
 import com.filiptoprek.wuff.navigation.Routes
-import com.filiptoprek.wuff.presentation.profile.ProfileViewModel
-import com.filiptoprek.wuff.presentation.reservation.ReservationViewModel
-import com.filiptoprek.wuff.presentation.reservation.reservationCard
-import com.filiptoprek.wuff.presentation.shared.SharedViewModel
+import com.filiptoprek.wuff.presentation.home.AppTitle
 import com.filiptoprek.wuff.ui.theme.Opensans
 import com.filiptoprek.wuff.ui.theme.Pattaya
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -53,9 +48,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -73,21 +65,7 @@ fun WithdrawalScreen(
             .wrapContentWidth(Alignment.CenterHorizontally)
             .wrapContentHeight(Alignment.Top)
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                text = "Wuff!",
-                style = TextStyle(
-                    fontFamily = Pattaya,
-                    fontSize = 50.sp,
-                    lineHeight = 27.sp,
-                    color = colorResource(R.color.green_accent)
-                )
-            )
-        }
+        AppTitle()
         Spacer(modifier = Modifier.size(20.dp))
         Column(
             modifier = Modifier.fillMaxWidth()
