@@ -1,7 +1,6 @@
 package com.filiptoprek.wuff.data.repository.location
 
 import com.filiptoprek.wuff.data.utils.await
-import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.location.Location
 import com.filiptoprek.wuff.domain.repository.location.LocationRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,9 +18,9 @@ class LocationRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getLocation(walkerId: String): Location {
+    override suspend fun getLocation(userId: String): Location {
        return try {
-           firebaseFirestore.collection("locations").document(walkerId).get().await().toObject(Location::class.java)!!
+           firebaseFirestore.collection("locations").document(userId).get().await().toObject(Location::class.java)!!
        }catch (e: Exception)
        {
            Location()

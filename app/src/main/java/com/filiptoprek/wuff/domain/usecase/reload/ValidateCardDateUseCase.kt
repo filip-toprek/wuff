@@ -9,6 +9,9 @@ class ValidateCardDateUseCase {
         val currentYear = currentDate.get(Calendar.YEAR)
         val currentMonth = currentDate.get(Calendar.MONTH) + 1 // Calendar.MONTH is zero-based
 
+        if(ccYear.isEmpty() || ccMonth.isEmpty())
+            return false
+
         val fullCcYear = if (ccYear.toInt() in 0..99) {
             val century = currentYear / 100 * 100
             century + ccYear.toInt()

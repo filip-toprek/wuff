@@ -37,6 +37,7 @@ import androidx.compose.ui.text.substring
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import arrow.fx.coroutines.unit
 import com.filiptoprek.wuff.R
 import com.filiptoprek.wuff.domain.model.auth.Resource
 import com.filiptoprek.wuff.domain.model.reservation.Reservation
@@ -65,6 +66,10 @@ fun WithdrawalScreen(
 ) {
     val withdrawFlow = withdrawViewModel.withdrawFlow.collectAsState()
     val withdrawals = withdrawViewModel.withdrawList.collectAsState()
+
+    LaunchedEffect(Unit) {
+        withdrawViewModel.refresh()
+    }
 
     Column(
         modifier = Modifier
