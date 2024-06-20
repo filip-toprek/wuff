@@ -202,8 +202,8 @@ fun userProfile(
                     Spacer(modifier = Modifier.size(15.dp))
                 }
 
-                if (!isEditing && !isApplying) {
-                    ProfileData(profileViewModel?.userProfile!!)
+                if (!isEditing && !isApplying && profileViewModel?.userProfile != null) {
+                    ProfileData(profileViewModel.userProfile!!)
 
                     Button(modifier = Modifier
                         .fillMaxWidth()
@@ -248,7 +248,7 @@ fun userProfile(
                                 }
                                 viewModel?.logout()
                                 navController.navigate(Routes.Login.route) {
-                                    popUpTo(Routes.Home.route) { inclusive = true }
+                                    popUpTo(Routes.LandingScreen.route) { inclusive = true }
                                 }
                             }
                         })

@@ -41,6 +41,9 @@ class ProfileViewModel @Inject constructor(
         authRepository.currentUserLiveData.observeForever { currentUser ->
             if (currentUser != null) {
                 loadUserProfile()
+            }else
+            {
+                profile = null
             }
         }
     }

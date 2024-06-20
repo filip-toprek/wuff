@@ -30,7 +30,7 @@ import com.filiptoprek.wuff.domain.usecase.reload.ValidateCVVUseCase
 import com.filiptoprek.wuff.domain.usecase.reload.ValidateCardDateUseCase
 import com.filiptoprek.wuff.domain.usecase.reload.ValidateReloadFormUseCase
 import com.filiptoprek.wuff.domain.usecase.reservation.ValidateReservationUseCase
-import com.filiptoprek.wuff.domain.usecase.withdraw.ValidateWIthdraw
+import com.filiptoprek.wuff.domain.usecase.withdraw.ValidateWithdraw
 import com.filiptoprek.wuff.domain.usecase.withdraw.ValidateWithdrawForm
 import com.filiptoprek.wuff.domain.usecase.withdraw.ValidateWithdrawProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -45,8 +45,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -135,7 +133,7 @@ object AppModule {
     @Singleton
     fun provideWithdrawFormValidatorUseCase(): ValidateWithdrawForm {
         return ValidateWithdrawForm(
-            validateWithdraw = ValidateWIthdraw(),
+            validateWithdraw = ValidateWithdraw(),
             validateWithdrawProfile = ValidateWithdrawProfile()
         )
     }

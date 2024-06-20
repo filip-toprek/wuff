@@ -28,8 +28,26 @@ class HomeViewModel @Inject constructor(
 
     init {
         if (_walkerList.value == emptyList<UserProfile?>()) {
-            getWalkers()
+            observeCurrentUser()
         }
+    }
+
+    // obsereve user, if current user is null load walker list
+    private fun observeCurrentUser() {
+        authRepository.currentUserLiveData.observeForever { currentUser ->
+            if (currentUser != null) {
+                getWalkers()
+            }else
+            {
+                _walkerList.value = emptyList()
+            }
+        }
+    }
+
+    // remove observer when user exits the app
+    override fun onCleared() {
+        authRepository.currentUserLiveData.removeObserver {  }
+        super.onCleared()
     }
 
     fun refresh(){

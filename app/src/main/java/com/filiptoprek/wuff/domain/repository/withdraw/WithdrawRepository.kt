@@ -8,4 +8,5 @@ import com.filiptoprek.wuff.domain.model.withdraw.Withdrawals
 interface WithdrawRepository {
     suspend fun createWithdrawalRequest(withdraw: Withdraw, withdrawProfile: WithdrawProfile, userProfile: UserProfile)
     suspend fun getWithdrawals(userProfile: UserProfile): Withdrawals
+    suspend fun checkBalance(amount: Double, userId: String): Boolean
 }

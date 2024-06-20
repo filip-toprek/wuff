@@ -73,19 +73,30 @@ class WithdrawViewModel @Inject constructor(
 
     // create a new withdrawal request
     fun createWithdrawal(withdraw: Withdraw, withdrawProfile: WithdrawProfile) {
-        when(validateWithdrawForm.validateForm(withdraw, withdrawProfile))
-        {
-            // handle failure
-            -1 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_AMOUNT"))
-            -2 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_IBAN"))
-            // handle success
-            1 -> {
-                viewModelScope.launch {
-                    val currentUserProfile = profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
-                    _createWithdrawFlow.value = Resource.Loading
-                    val result = withdrawRepository.createWithdrawalRequest(withdraw, withdrawProfile, currentUserProfile!!)
-                    _createWithdrawFlow.value = Resource.Success(result)
-                    delayBeforeReset()
+        viewModelScope.launch {
+            when (validateWithdrawForm.validateForm(
+                withdraw,
+                withdrawProfile,
+                withdrawRepository,
+                authRepository
+            )) {
+                // handle failure
+                -1 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_AMOUNT"))
+                -2 -> _createWithdrawFlow.value = Resource.Failure(Exception("BAD_IBAN"))
+                // handle success
+                1 -> {
+                    viewModelScope.launch {
+                        val currentUserProfile =
+                            profileRepository.getUserProfile(authRepository.currentUser?.uid.toString())
+                        _createWithdrawFlow.value = Resource.Loading
+                        val result = withdrawRepository.createWithdrawalRequest(
+                            withdraw,
+                            withdrawProfile,
+                            currentUserProfile!!
+                        )
+                        _createWithdrawFlow.value = Resource.Success(result)
+                        delayBeforeReset()
+                    }
                 }
             }
         }

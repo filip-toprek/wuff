@@ -74,6 +74,9 @@ class ReservationViewModel @Inject constructor(
                 viewModelScope.launch {
                     getReservationsList()
                 }
+            }else
+            {
+                _reservationsList.value = emptyList()
             }
         }
     }
